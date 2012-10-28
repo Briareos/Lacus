@@ -1,0 +1,89 @@
+services:
+    sonata.main.admin.site:
+        class: Lacus\MainBundle\Admin\SiteAdmin
+        arguments: [null, Lacus\MainBundle\Entity\Site, MainBundle:SiteAdmin]
+        tags:
+            - { name: sonata.admin, manager_type: orm, group: main_site, label: sites }
+        calls:
+            - [ setProviderPool, [ @lacus.content_provider.pool ] ]
+    sonata.main.admin.account:
+        class: Lacus\MainBundle\Admin\AccountAdmin
+        arguments: [null, Lacus\MainBundle\Entity\Account, SonataAdminBundle:CRUD]
+        tags:
+            - { name: sonata.admin, manager_type: orm, group: main_account, label: accounts }
+        calls:
+            - [ setProviderPool, [ @lacus.content_provider.pool ] ]
+    sonata.main.admin.post:
+        class: Lacus\MainBundle\Admin\PostAdmin
+        arguments: [null, Lacus\MainBundle\Entity\Post, SonataAdminBundle:CRUD]
+        tags:
+            - { name: sonata.admin, manager_type: orm, group: main_post, label: posts }
+        calls:
+            - [ setProviderPool, [ @lacus.content_provider.pool ] ]
+    sonata.main.admin.mapper:
+        class: Lacus\MainBundle\Admin\MapperAdmin
+        arguments: [null, Lacus\MainBundle\Entity\Mapper, MainBundle:MapperAdmin]
+        tags:
+            - { name: sonata.admin, manager_type: orm, group: main_mapper, label: mappers }
+        calls:
+            - [ setProviderPool, [ @lacus.content_provider.pool ] ]
+    lacus.post.poster:
+        class: Lacus\MainBundle\Post\Poster
+        arguments: [ @buzz ]
+    lacus.post.manager:
+        class: Lacus\MainBundle\Post\Manager
+        arguments: [ @doctrine.orm.default_entity_manager ]
+    lacus.post.listener:
+        class: Lacus\MainBundle\Listener\PostPoster
+        arguments: [ @lacus.post.poster ]
+        tags:
+            - { name: doctrine.event_listener, event: postPersist }
+            - { name: doctrine.event_listener, event: preUpdate }
+    lacus.content_provider.abstract:
+        class: Lacus\MainBundle\Content\Provider\AbstractProvider
+        abstract: true
+        calls:
+            - [ setClient, [ @buzz ] ]
+    lacus.content_provider.pornhub:
+        class: Lacus\MainBundle\Content\Provider\Pornhub
+        parent: lacus.content_provider.abstract
+        tags:
+            - { name: lacus.content_provider, alias: pornhub }
+    lacus.content_provider.youporn:
+        class: Lacus\MainBundle\Content\Provider\Youporn
+        parent: lacus.content_provider.abstract
+        tags:
+            - { name: lacus.content_provider, alias: youporn }
+    lacus.content_provider.extremetube:
+        class: Lacus\MainBundle\Content\Provider\Extremetube
+        parent: lacus.content_provider.abstract
+        tags:
+            - { name: lacus.content_provider, alias: extremetube }
+    lacus.content_provider.spankwire:
+        class: Lacus\MainBundle\Content\Provider\Spankwire
+        parent: lacus.content_provider.abstract
+        tags:
+            - { name: lacus.content_provider, alias: spankwire }
+    lacus.content_provider.talkshoes:
+        class: Lacus\MainBundle\Content\Provider\Talkshoes
+        parent: lacus.content_provider.abstract
+        tags:
+            - { name: lacus.content_provider, alias: talkshoes }
+    lacus.content_provider.pool:
+        class: Lacus\MainBundle\Content\ProviderPool
+    lacus.form.type.mapper_data:
+        class: Lacus\MainBundle\Form\Type\MapperDataType
+        tags:
+            - { name: form.type, alias: mapper_data }
+    lacus.form.type.mapper_image:
+        class: Lacus\MainBundle\Form\Type\MapperImageType
+        tags:
+            - { name: form.type, alias: mapper_image }
+    lacus.form.type.mapper_textarea:
+        class: Lacus\MainBundle\Form\Type\MapperTextareaType
+        tags:
+            - { name: form.type, alias: mapper_textarea }
+    lacus.form.type.mapper_file:
+        class: Lacus\MainBundle\Form\Type\MapperFileType
+        tags:
+            - { name: form.type, alias: mapper_file }

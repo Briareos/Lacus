@@ -4,7 +4,7 @@ imports:
 
 framework:
     #esi:             ~
-    #translator:      { fallback: %locale% }
+    translator:      { fallback: %locale% }
     secret:          %secret%
     router:
         resource: "%kernel.root_dir%/config/routing.yml"
@@ -21,6 +21,9 @@ framework:
 twig:
     debug:            %kernel.debug%
     strict_variables: %kernel.debug%
+    form:
+        resources:
+            - MainBundle::fields.html.twig
 
 # Assetic Configuration
 assetic:
@@ -45,7 +48,8 @@ doctrine:
         user:     %database_user%
         password: %database_password%
         charset:  UTF8
-
+        types:
+            json: Sonata\Doctrine\Types\JsonType
     orm:
         auto_generate_proxy_classes: %kernel.debug%
         auto_mapping: true
@@ -57,3 +61,68 @@ swiftmailer:
     username:  %mailer_user%
     password:  %mailer_password%
     spool:     { type: memory }
+
+fos_user:
+    db_driver:      orm
+    firewall_name:  main
+    user_class:     Application\Sonata\UserBundle\Entity\User
+    group:
+        group_class: Application\Sonata\UserBundle\Entity\Group
+
+sonata_block:
+    default_contexts: [cms]
+    blocks:
+        sonata.admin.block.admin_list:
+            contexts:   [admin]
+
+        #sonata.admin_doctrine_orm.block.audit:
+        #    contexts:   [admin]
+
+        sonata.block.service.text:
+        sonata.block.service.action:
+        sonata.block.service.rss:
+
+        # Some specific blocks from the SonataMediaBundle
+        #sonata.media.block.media:
+        #sonata.media.block.gallery:
+        #sonata.media.block.feature_media:
+
+sonata_admin:
+    title:      Lacus Project
+    title_logo: /bundles/sonataadmin/logo_title.png
+    security:
+        handler: sonata.admin.security.handler.role
+    templates:
+        # default global templates
+        layout:  MainBundle::lacus_layout.html.twig
+        ajax:    SonataAdminBundle::ajax_layout.html.twig
+        dashboard: SonataAdminBundle:Core:dashboard.html.twig
+
+        # default actions templates, should extend a global templates
+        list:    SonataAdminBundle:CRUD:list.html.twig
+        show:    SonataAdminBundle:CRUD:show.html.twig
+        edit:    SonataAdminBundle:CRUD:edit.html.twig
+    dashboard:
+        blocks:
+            # display a dashboard block
+            - { position: left, type: sonata.admin.block.admin_list }
+        groups:
+            user:
+                label: sonata.user.admin.user
+                items:
+                    - sonata.user.admin.user
+                    - sonata.user.admin.group
+            site:
+                label: sonata.main.label.site
+                items:
+                    - sonata.main.admin.site
+                    - sonata.main.admin.account
+                    - sonata.main.admin.mapper
+                    - sonata.main.admin.post
+
+sonata_user:
+    admin:
+        user:
+            translation: messages
+        group:
+            translation: messages

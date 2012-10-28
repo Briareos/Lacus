@@ -1,0 +1,30 @@
+{% extends 'SonataAdminBundle:CRUD:base_list_field.html.twig' %}
+
+{% block field %}
+    <div class="btn-group">
+        <button class="btn btn-mini dropdown-toggle" data-toggle="dropdown">
+            <span class="badge badge-info">{{ value|length }}</span>
+            Mappers
+            <span class="caret"></span>
+        </button>
+        <ul class="dropdown-menu">
+            {% set mappers_active = false %}
+            {% set mappers_configured = 0 %}
+            {% for mapper in value %}
+                {% if field_description.hasassociationAdmin and field_description.associationAdmin.id(mapper) and field_description.associationAdmin.isGranted('EDIT') and field_description.associationAdmin.hasRoute('edit') %}
+                    {% set mappers_active = true %}
+                    <li><a href="{{ field_description.associationAdmin.generateObjectUrl('edit', mapper) }}">{{ mapper.name }} — <span class="label label-inverse">{{ mapper.provider|capitalize }}</span></a></li>
+                    {% if mapper.data %}
+                        {% set mappers_configured = mappers_configured + 1 %}
+                    {% endif %}
+                {% endif %}
+            {% endfor %}
+            {% if field_description.associationAdmin.isGranted('CREATE') and field_description.associationAdmin.hasRoute('create') %}
+                {% if mappers_active %}
+                    <li class="divider"></li>
+                {% endif %}
+                <li><a href="{{ field_description.associationAdmin.generateUrl('create') }}"><i class="icon-list-alt"></i> Create a new mapper</a></li>
+            {% endif %}
+        </ul>
+    </div>
+{% endblock %}

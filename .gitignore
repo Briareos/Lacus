@@ -1,7 +1,11 @@
-webroot/bundles/
+webroot
+certs
+cgi-bin
+web/bundles/
+web/uploads/
 app/bootstrap.php.cache
 app/cache/*
 app/logs/*
+app/config/parameters.yml
 build/
 vendor
-composer.phar

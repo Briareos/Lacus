@@ -1,0 +1,18 @@
+{% extends base_template %}
+
+{% block title %}Listing provider content{% endblock %}
+
+{% block content %}
+    <div class="row-fluid">
+        <div class="span2 offset5">
+            <p>
+                Select a provider:
+            </p>
+            <ul class="nav nav-tabs nav-stacked">
+                {% for provider_name in providers %}
+                    <li><a href="{{ path('admin_lacus_main_site_provider',{'provider':provider_name}) }}">{{ provider_name|capitalize }}</a></li>
+                {% endfor %}
+            </ul>
+        </div>
+    </div>
+{% endblock %}

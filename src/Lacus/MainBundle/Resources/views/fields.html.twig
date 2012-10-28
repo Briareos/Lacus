@@ -1,0 +1,135 @@
+{% extends 'form_div_layout.html.twig' %}
+
+{% block mapper_file_widget %}
+    {{ form_widget(form) }}
+    {% if form.vars.value and form.vars.value.getWebPath() is not null %}
+<a href="{{ asset(form.vars.value.getWebPath()) }}">{{ form.vars.value.getFileName() }}</a>
+{% endif %}
+{% endblock %}
+
+{% block mapper_textarea_widget %}
+    {{ form_widget(form,{'attr':{'data-wysiwyg':true }}) }}
+{% endblock %}
+
+{% block mapper_data_widget %}
+    <script>
+        $(function () {
+            $('#{{ id }}-get-fields').click(function () {
+                var $button = $(this);
+                $.ajax({
+                    url:'{{ path('admin_lacus_main_mapper_get_fields') }}',
+                    type:'POST',
+                    data:{
+                        account:$('#{{ form.parent['account'].vars.id }}').val(),
+                        id:$('#{{ form.parent['id'].vars.id }}').val()
+                    },
+                    beforeSend:function () {
+                        $('#{{ id }}-messages').slideUp(function () {
+                            $(this).html('');
+                        });
+                        $button.button('loading');
+                    },
+                    success:function (data) {
+                        $button.button('reset');
+                        if (data.error) {
+                            $('#{{ id }}-messages').append($('<div class="alert"><button type="button" class="close" data-dismiss="alert">×</button></div>').append(data.error)).slideDown();
+                        } else {
+                            $('#{{ id }}').val(data);
+                        }
+                    }
+                });
+            });
+        });
+    </script>
+    <p>
+        <button class="btn" type="button" id="{{ id }}-get-fields">Fetch form fields</button>
+    </p>
+    <div id="{{ id }}-messages" class="hide"></div>
+
+    {{ form_widget(form, {'attr':{'style':'font-family:consolas' }}) }}
+{% endblock %}
+
+{% block field_row %}
+    {% spaceless %}
+        <div class="control-group{% if errors|length > 0 %} error{% endif %}">
+            {{ form_label(form, label|default(null),{'label_attr':{'class':'control-label' }}) }}
+            <div class="controls">
+                {{ form_widget(form, { 'attr' : attr|default({})|merge({'class':'span5'}) }) }}
+                {{ form_errors(form) }}
+                {% if help is defined %}
+                    <p class="help-block">{{ help }}</p>
+                {% endif %}
+            </div>
+        </div>
+    {% endspaceless %}
+{% endblock field_row %}
+
+{% block form_errors %}
+    {% spaceless %}
+        {% if errors|length > 0 %}
+            {% if errors|length == 1 %}
+                <p class="alert alert-error">
+                    {{ errors[0].messagePluralization is null ?
+                    errors[0].messageTemplate|trans(errors[0].messageParameters, 'validators')
+                    : errors[0].messageTemplate|transchoice(errors[0].messagePluralization, errors[0].messageParameters, 'validators') }}
+                </p>
+            {% else %}
+                <div class="alert alert-error">
+                    <ul>
+                        {% for error in errors %}
+                            <li>{{ error.messagePluralization is null
+                            ? error.messageTemplate|trans(error.messageParameters, 'validators')
+                            : error.messageTemplate|transchoice(error.messagePluralization, error.messageParameters, 'validators') }}</li>
+                        {% endfor %}
+                    </ul>
+                </div>
+            {% endif %}
+        {% endif %}
+    {% endspaceless %}
+{% endblock form_errors %}
+
+{% block mapper_image_widget %}
+    <script>
+        $(function () {
+            $(document).on('blur', '#{{ id }}', function () {
+                $('#{{ id }}-img').attr('src', $(this).val());
+            });
+            $(document).on('click', '#{{ id }}-alt a', function () {
+                $('#{{ id }}').val($('img', this).attr('src')).trigger('blur');
+                return false;
+            });
+        })
+    </script>
+
+    {{ form_widget(form) }}
+
+    {% if alternatives|length %}
+        <div class="btn-group pull-right">
+            <a class="btn dropdown-toggle" data-toggle="dropdown" href="#">
+                Alternative images
+                <span class="caret"></span>
+            </a>
+            <ul id="{{ id }}-alt" class="dropdown-menu">
+                {% for alternative in alternatives %}
+                    <li><a href="#"><img src="{{ alternative }}"/></a></li>
+                {% endfor %}
+            </ul>
+        </div>
+    {% endif %}
+
+    <img class="img-polaroid" id="{{ id }}-img" src="{{ form.vars.value }}"/>
+
+{% endblock %}
+
+{% block choice_widget_expanded %}
+    {% spaceless %}
+        <div {{ block('widget_container_attributes') }}>
+            {% for child in form %}
+                <label class="">
+                    {{ form_widget(child, {'attr': {'class': attr.widget_class|default('') }}) }}
+                    {{ child.vars.label|trans({}, translation_domain) }}
+                </label>
+            {% endfor %}
+        </div>
+    {% endspaceless %}
+{% endblock %}

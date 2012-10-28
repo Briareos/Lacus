@@ -1,0 +1,12 @@
+Lacus\MainBundle\Entity\Site:
+    properties:
+        name:
+            - NotBlank: ~
+        url:
+            - NotBlank: ~
+            - Url: ~
+
+Lacus\MainBundle\Entity\Mapper:
+    properties:
+        data:
+            - Lacus\MainBundle\Validator\Constraints\MapperData: ~

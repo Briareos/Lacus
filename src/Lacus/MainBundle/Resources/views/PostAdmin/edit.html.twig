@@ -1,0 +1,21 @@
+{% extends 'SonataAdminBundle:CRUD:base_edit.html.twig' %}
+
+{% form_theme form 'MainBundle::fields.html.twig' %}
+
+{% block form %}
+    <dl class="dl-horizontal">
+        <dt>Submitted at</dt>
+        <dd>{{ object.createdAt|date('H:i:s \\o\\n d. m. Y.') }}</dd>
+        <dt>By</dt>
+        <dd>{{ object.user.username }}</dd>
+        {% if object.postedAt %}
+            <dt>Submitted at</dt>
+            <dd>{{ object.submittedAt|date('H:i:s \\o\\n d. m. Y.') }}</dd>
+        {% endif %}
+        <dt>Content type</dt>
+        <dd>{{ object.mapper.name }}</dd>
+        <dt>Posting on site</dt>
+        <dd>{{ object.mapper.site.name }}</dd>
+    </dl>
+    {{ parent() }}
+{% endblock %}

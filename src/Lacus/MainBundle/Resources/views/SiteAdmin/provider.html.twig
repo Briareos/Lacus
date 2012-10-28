@@ -1,0 +1,234 @@
+{% extends base_template %}
+
+{% block title %}Listing provider content{% endblock %}
+
+{% block content %}
+    <script>
+
+    </script>
+    <div class="row-fluid">
+    <div class="span3">
+
+        <script>
+            $(function () {
+                //$('#provider-sidebar').affix();
+            });
+        </script>
+        <div id="provider-sidebar" class="affix">
+            <div>
+                <p>
+                    Click <a href="{{ current_provider_url }}">here</a> to go live results page.
+                    <br>
+                    Select from a list of available providers.
+                </p>
+
+                <div class="btn-group">
+                    <a class="btn btn-inverse dropdown-toggle" data-toggle="dropdown" href="#">
+                        {{ current_provider|capitalize }}
+                        <span class="caret"></span>
+                    </a>
+                    <ul class="dropdown-menu">
+                        {% for provider_name in providers %}
+                            <li class="{{ current_provider == provider_name ? 'active' : '' }}"><a
+                                    href="{{ path('admin_lacus_main_site_provider',{'provider':provider_name}) }}">{{ provider_name|capitalize }}</a>
+                            </li>
+                        {% endfor %}
+                    </ul>
+                </div>
+                <hr>
+            </div>
+
+            <form method="get" {{ form_enctype(form) }}
+                  action="{{ path('admin_lacus_main_site_provider',{'provider':current_provider}) }}">
+                <div class="input-prepend input-append">
+                    <label title="Search" for="{{ form.search.vars.id }}" class="add-on"><i class="icon-search"></i></label>
+                    {{ form_widget(form.search) }}
+                    <button class="btn" type="button" onclick="this.form['{{ form.search.vars.name }}'].value='';">
+                        <i class="icon-remove"></i>
+                    </button>
+                </div>
+                <div class="input-prepend input-append">
+                    <label title="Category" for="{{ form.category.vars.id }}" class="add-on"><i class="icon-list"></i></label>
+                    {{ form_widget(form.category) }}
+                    <button class="btn" type="button" onclick="$('option:first',this.form['{{ form.category.vars.name }}']).prop('selected',true);">
+                        <i class="icon-remove"></i>
+                    </button>
+                </div>
+                <div class="input-prepend input-append">
+                    <label title="Sort by" for="{{ form.sort.vars.id }}" class="add-on"><i class="icon-chevron-down"></i></label>
+                    {{ form_widget(form.sort) }}
+                    <button class="btn" type="button" onclick="$('option:first',this.form['{{ form.sort.vars.name }}']).prop('selected',true);">
+                        <i class="icon-remove"></i>
+                    </button>
+                </div>
+
+                <div class="input-prepend">
+                    <button type="button" class="btn btn-primary"
+                            onclick="this.form['{{ form.page.vars.name }}'].value=1;this.form.submit();">First
+                    </button>
+                    {{ form_widget(form.page, {'attr':{'class':'input-mini' }}) }}
+                    <button type="button" class="btn btn-link"
+                            onclick="this.form['{{ form.page.vars.name }}'].value--;this.form.submit();"><i
+                            class="icon-chevron-left"></i> Previous
+                    </button>
+                    <button type="button" class="btn btn-link"
+                            onclick="this.form['{{ form.page.vars.name }}'].value++;this.form.submit();">Next <i
+                            class="icon-chevron-right"></i></button>
+                </div>
+
+                {{ form_rest(form) }}
+
+                <div class="form-actions">
+                    <button type="submit" class="btn btn-primary">Submit</button>
+                    <a class="btn"
+                       href="{{ path('admin_lacus_main_site_provider',{'provider':current_provider}) }}">Reset
+                        all</a>
+                </div>
+            </form>
+        </div>
+    </div>
+    <div class="span9">
+
+    {% if content_collection.hasContent() %}
+        {% if current_provider_title is not empty %}
+            <h3>{{ current_provider_title }}</h3>
+        {% endif %}
+        <script>
+            $(function () {
+                $('[data-mapper]').click(function () {
+                    var contentUuid = $(this).data('content');
+                    var serialized = $('[data-serialized][data-content="' + contentUuid + '"]').data('serialized');
+                    $.ajax({
+                        url:$(this).attr('href'),
+                        type:'POST',
+                        data:{
+                            content:serialized
+                        },
+                        success:function (data) {
+                            if (data.error) {
+
+                            } else {
+                                var $modal = $('.ajax-finalize');
+                                if ($modal.length) {
+                                    $modal.html(data).modal('show');
+                                } else {
+                                    $modal = $('<div class="modal fade hide ajax-finalize"></div>').appendTo('body').html(data).modal('show');
+                                }
+                                window.attach($modal);
+                            }
+                        }
+                    });
+                    return false;
+                });
+            });
+        </script>
+        <ul class="thumbnails">
+        {% for content in content_collection %}
+            <li class="thumbnail" {% if content.width %}style="width: {{ content.width }}px;"{% endif %}>
+            {% for field in content if field.option('visible_on_list') and field.option('display_on_list') %}
+                {% if field.type == 'image' %}
+                    <img height="{{ field.option('height') }}" width="{{ field.option('width') }}" src="{{ field.value }}"/>
+                {% elseif field.type == 'embed' %}
+                {% elseif field.type == 'url' %}
+                    <div style="margin: 0 10px; text-overflow: ellipsis; white-space: nowrap; width: {{ provider_content_width }}px; overflow: hidden;">
+                        <a title="{{ field.value }}" href="{{ field.value }}">{{ field.value }}</a>
+                    </div>
+                {% elseif field.type == 'duration' %}
+                    <div style="margin: 0 10px;">
+                        <p>Duration: <span class="badge badge-inverse">{{ field.value }}</span></p>
+                    </div>
+                {% elseif field.type == 'text' %}
+                    <div style="margin: 10px; text-overflow: ellipsis; white-space: nowrap; width: {{ provider_content_width }}px; overflow: hidden;">
+                        <p>{{ field.value }}</p>
+                    </div>
+                {% elseif field.type == 'title' %}
+                    <div style="margin: 10px">
+                        <h5 title="{{ field.value }}" style="text-overflow: ellipsis; white-space: nowrap; width: {{ provider_content_width }}px; overflow: hidden;">{{ field.value }}</h5>
+                    </div>
+                {% elseif field.type == 'tags' %}
+                    {% if field.value|length %}
+                        <div style="margin: 10px;">
+                            Tags:
+                            {% for tag in field.value %}
+                                <span class="label label-success">{{ tag }}</span>
+                                {% if not loop.last %}
+                                    ,
+                                {% endif %}
+                            {% endfor %}
+                        </div>
+                    {% endif %}
+                {% elseif field.type == 'article' %}
+                    <div style="margin: 10px;">
+                        {{ field.value|raw }}
+                    </div>
+                {% elseif field.type == 'image_collection' %}
+                    <div style="margin: 10px">
+                        <div class="btn-group dropup">
+                            <a class="btn btn-small dropdown-toggle" data-toggle="dropdown" href="#">
+                                <span class="badge">{{ field.value|length }}</span>
+                                Images
+                                <span class="caret"></span>
+                            </a>
+                            <ul class="dropdown-menu"
+                                style="height: {{ field.option('height')*2+48 }}px; overflow: auto;">
+                                {% for image in field.value %}
+                                    <li style="padding: 10px 20px 10px 10px;">
+                                        <img class="img-polaroid" src="{{ image }}" height="{{ field.option('height') }}" width="{{ field.option('width') }}"/>
+                                    </li>
+                                {% endfor %}
+                            </ul>
+                        </div>
+                    </div>
+                {% endif %}
+                    {% endfor %}
+                    <div style="margin: 5px 10px;">
+                        <a href="{{ content.url }}">View on site</a>
+                    </div>
+                    <div style="margin: 10px 10px 0 10px;">
+                        <div class="btn-group dropup">
+                            <a class="btn btn-primary dropdown-toggle" data-toggle="dropdown" href="#">
+                                <i class="icon-ok icon-white"></i>
+                                Post to site
+                                <span class="caret"></span>
+                            </a>
+                            <ul class="dropdown-menu" data-content="{{ content.uuid }}" data-serialized="{{ content.serialized }}">
+                                {% if sites|length %}
+                                    {% for site in sites %}
+                                        {% if loop.index > 1 %}
+                                            <li class="divider"></li>
+                                        {% endif %}
+                                        <li class="nav-header">{{ site.name }}</li>
+                                        {% if site.getMappersFor(current_provider)|length %}
+                                            {% for mapper in site.getMappersFor(current_provider) %}
+                                                <li>
+                                                    <a href="{{ path('admin_lacus_main_site_provider_finalize',{'provider':current_provider,'mapperId':mapper.id}) }}" data-mapper data-content="{{ content.uuid }}">
+                                                        {{ mapper.name }}
+                                                        {% if mapped_posts[mapper.id][content.uuid] is defined %}
+                                                            {% set mapped_post = mapped_posts[mapper.id][content.uuid] %}
+                                                            <span class="label label-info">{{ mapped_post.status }}</span>
+                                                        {% endif %}
+                                                    </a>
+                                                </li>
+                                            {% endfor %}
+                                        {% endif %}
+                                        <li>
+                                            <a href="{{ path('admin_lacus_main_mapper_create',{'siteId':site.id,'provider':current_provider}) }}"><i class="icon-list-alt"></i> Create a new mapper</a></li>
+                                    {% endfor %}
+                                {% else %}
+                                    <li><a href="{{ path('admin_lacus_main_site_create') }}"><i class="icon-warning-sign"></i> No sites configured, click here to create a new one</a></li>
+                                {% endif %}
+                            </ul>
+                        </div>
+                    </div>
+                    </li>
+                    {% endfor %}
+                    </ul>
+                {% else %}
+                    <div class="alert alert-error alert-block">
+                        <h4>Error</h4>
+                        No content found for the specified criteria.
+                    </div>
+                {% endif %}
+                </div>
+                </div>
+                {% endblock %}
