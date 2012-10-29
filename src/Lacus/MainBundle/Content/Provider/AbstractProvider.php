@@ -178,6 +178,15 @@ abstract class AbstractProvider
         if (!$content->getUrl()) {
             throw new ValidationException('Content must have a URL specified.');
         }
+        foreach ($content as $field) {
+            /** @var $field \Lacus\MainBundle\Content\Segment\AbstractSegment */
+            if ($list && $field->getOption('visible_on_list') && !$field->getValue()) {
+                throw new ValidationException(sprintf('Field "%s" is empty, but is configured as "visible_on_list".', $field->getName()));
+            }
+            if (!$list && !$field->getValue()) {
+                throw new ValidationException(sprintf('Field "%s" is empty while in full view.', $field->getName()));
+            }
+        }
     }
 
     public function getContentTemplate()

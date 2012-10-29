@@ -3,6 +3,7 @@
 namespace Lacus\MainBundle\Controller;
 
 use Sonata\AdminBundle\Controller\CRUDController;
+use Lacus\MainBundle\Content\Exception\ValidationException;
 use Lacus\MainBundle\Content\ContentCollection;
 use Lacus\MainBundle\Entity\Mapper;
 use Lacus\MainBundle\Entity\Post;
@@ -28,22 +29,24 @@ class SiteAdminController extends CRUDController
      */
     private $postManager;
 
+    /**
+     * @DI\Inject("lacus.content_provider.pool")
+     *
+     * @var \Lacus\MainBundle\Content\ProviderPool
+     */
+    private $providerPool;
+
     public function providerListAction()
     {
-        /** @var $pool \Lacus\MainBundle\Content\ProviderPool */
-        $pool = $this->get('lacus.content_provider.pool');
-
         return $this->render('MainBundle:SiteAdmin:provider_list.html.twig', array(
             'action' => 'provider_list',
-            'providers' => $pool->getProviderAliases(),
+            'providers' => $this->providerPool->getProviderAliases(),
         ));
     }
 
     public function providerAction($provider)
     {
-        /** @var $pool \Lacus\MainBundle\Content\ProviderPool */
-        $pool = $this->get('lacus.content_provider.pool');
-        $activeProvider = $pool->getProvider($provider);
+        $activeProvider = $this->providerPool->getProvider($provider);
 
         $form = $this->getFilterForm($activeProvider);
         $form->bind($this->getRequest());
@@ -61,7 +64,7 @@ class SiteAdminController extends CRUDController
             'provider_content_width' => $activeProvider->getContentTemplate()->getWidth(),
             'form' => $form->createView(),
             'current_provider' => $provider,
-            'providers' => $pool->getProviderAliases(),
+            'providers' => $this->providerPool->getProviderAliases(),
             'sites' => $sites,
             'mapped_posts' => $mapped_posts,
         ));
@@ -84,9 +87,7 @@ class SiteAdminController extends CRUDController
             throw $this->createNotFoundException('Cannot unserialize content.');
         }
 
-        /** @var $pool \Lacus\MainBundle\Content\ProviderPool */
-        $pool = $this->get('lacus.content_provider.pool');
-        if (!$pool->hasProvider($provider)) {
+        if (!$this->providerPool->hasProvider($provider)) {
             throw $this->createNotFoundException('Invalid content provider specified.');
         }
         /** @var $mapper \Lacus\MainBundle\Entity\Mapper */
@@ -99,7 +100,7 @@ class SiteAdminController extends CRUDController
             throw $this->createNotFoundException('Mapper is not configured.');
         }
 
-        $currentProvider = $pool->getProvider($provider);
+        $currentProvider = $this->providerPool->getProvider($provider);
         $currentProvider->getContent($content);
 
         $post = $this->getPost($mapper, $content);
@@ -221,4 +222,24 @@ class SiteAdminController extends CRUDController
         ));
     }
 
+    public function checkAction($provider)
+    {
+        $provider = $this->providerPool->getProvider($provider);
+
+        try {
+            $contentCollection = $provider->getContentCollection();
+        } catch(ValidationException $ve) {
+
+        } catch (\Exception $e) {
+
+        }
+
+        return $this->render('MainBundle:SiteAdmin:check.html.twig', array(
+        ));
+    }
+
+    public function checkProviderAction($provider)
+    {
+
+    }
 }

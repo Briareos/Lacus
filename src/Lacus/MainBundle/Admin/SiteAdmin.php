@@ -46,6 +46,15 @@ class SiteAdmin extends Admin
         $collection->add('queue', 'queue', array(
             '_controller' => 'MainBundle:SiteAdmin:queue',
         ));
+        $collection->add('check', 'check', array(
+            '_controller' => 'MainBundle:SiteAdmin:check',
+        ));
+        $collection->add('check', 'check', array(
+            '_controller' => 'MainBundle:SiteAdmin:check',
+        ));
+        $collection->add('check_provider', 'check/{provider}', array(
+            '_controller' => 'MainBundle:SiteAdmin:check',
+        ));
     }
 
     protected function configureFormFields(FormMapper $form)
