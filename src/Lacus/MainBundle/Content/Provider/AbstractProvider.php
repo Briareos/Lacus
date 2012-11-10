@@ -162,6 +162,7 @@ abstract class AbstractProvider
 
     public function getContent(Content $content)
     {
+        $this->setActiveUrl($content->getUrl());
         $this->populateContent($content);
         $this->validateContent($content, false);
         return $content;

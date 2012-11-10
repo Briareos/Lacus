@@ -10,7 +10,9 @@
             </p>
             <ul class="nav nav-tabs nav-stacked">
                 {% for provider_name in providers %}
-                    <li><a href="{{ path('admin_lacus_main_site_provider',{'provider':provider_name}) }}">{{ provider_name|capitalize }}</a></li>
+                    {% if admin.isGranted('PROVIDER_'~provider_name|upper) %}
+                        <li><a href="{{ path('admin_lacus_main_post_provider',{'provider':provider_name}) }}">{{ provider_name|capitalize }}</a></li>
+                    {% endif %}
                 {% endfor %}
             </ul>
         </div>

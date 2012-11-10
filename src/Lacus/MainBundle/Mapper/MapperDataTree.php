@@ -3,6 +3,7 @@
 namespace Lacus\MainBundle\Mapper;
 
 use Symfony\Component\Config\Definition\Builder\TreeBuilder;
+use Symfony\Component\Yaml\Yaml;
 
 class MapperDataTree
 {
@@ -41,6 +42,9 @@ class MapperDataTree
                                     ->scalarNode('default')->defaultNull()->end()
                                     ->booleanNode('show_alternatives')->defaultFalse()->end()
                                     ->booleanNode('wysiwyg')->defaultFalse()->end()
+                                    ->variableNode('choices')
+                                        ->defaultNull()
+                                    ->end()
                                 ->end()
                             ->end()
                         ->end()
@@ -74,12 +78,17 @@ class MapperDataTree
     }
 
     /**
-     * @param string $rawData
+     * @param string $yamlData
      * @return array
      */
-    public static function filter($rawData)
+    public static function filter(array $yamlData)
     {
         $tree = self::getTree();
-        return $tree->finalize($tree->normalize($rawData));
+        return $tree->finalize($tree->normalize($yamlData));
+    }
+
+    public static function parse($rawData)
+    {
+        return self::filter(Yaml::parse($rawData));
     }
 }

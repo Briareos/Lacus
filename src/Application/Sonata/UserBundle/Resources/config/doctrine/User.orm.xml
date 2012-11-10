@@ -10,8 +10,8 @@
             <generator strategy="AUTO"/>
         </id>
 
-        <one-to-many target-entity="Lacus\MainBundle\Entity\Site" mapped-by="owner" field="sites">
-        </one-to-many>
+        <many-to-many target-entity="Lacus\MainBundle\Entity\Site" mapped-by="users" field="sites">
+        </many-to-many>
 
         <one-to-many target-entity="Lacus\MainBundle\Entity\Post" mapped-by="user" field="posts">
         </one-to-many>

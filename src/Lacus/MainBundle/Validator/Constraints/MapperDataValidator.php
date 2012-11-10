@@ -12,15 +12,18 @@ class MapperDataValidator extends ConstraintValidator
 {
     public function validate($value, Constraint $constraint)
     {
+        if ($value === null) {
+            return;
+        }
         try {
             $value = Yaml::parse($value);
         } catch (\Exception $e) {
             $this->context->addViolation($constraint->yamlInvalid, array('{{ error }}' => $e->getMessage()));
         }
 
-        try{
+        try {
             MapperDataTree::filter($value);
-        } catch(\Exception $e){
+        } catch (\Exception $e) {
             $this->context->addViolation($constraint->formatInvalid, array('{{ error }}' => $e->getMessage()));
         }
     }

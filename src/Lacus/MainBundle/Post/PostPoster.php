@@ -3,6 +3,8 @@
 namespace Lacus\MainBundle\Post;
 
 use Lacus\MainBundle\Entity\Post;
+use Lacus\MainBundle\Post\Exception\LoginFormNotFoundException;
+use Lacus\MainBundle\Post\Exception\SubmitFormNotFoundException;
 use Buzz\Message\Form\FormUpload;
 use Buzz\Message\Response;
 use Buzz\Util\Url;
@@ -13,7 +15,7 @@ use Lacus\MainBundle\Entity\Site;
 use Lacus\MainBundle\Entity\Account;
 use Buzz\Browser;
 
-class Poster
+class PostPoster
 {
     private $browser;
 
@@ -38,22 +40,22 @@ class Poster
         }
 
         $submitUrl = new Url($form->getUri());
-        $submitRequest = $this->browser->getMessageFactory()->createFormRequest($form->getMethod());
-        $submitRequest->setFields($form->getPhpValues());
+        $request = $this->browser->getMessageFactory()->createFormRequest($form->getMethod());
+        $request->setFields($form->getPhpValues());
         foreach ($post->getFileFields() as $fileFieldName => $file) {
             /** @var $file \Lacus\MainBundle\Entity\File */
             if ($form->has($fileFieldName)) {
-                // @TODO move this somewhere else
-                $file->upload();
                 $formFile = new FormUpload($file->getAbsolutePath(), $file->getMimetype());
                 $formFile->setName($file->getFileName());
-                $submitRequest->setField($fileFieldName, $formFile);
+                $request->setField($fileFieldName, $formFile);
             }
         }
-        $submitUrl->applyToRequest($submitRequest);
-        $this->cookieJar->addCookieHeaders($submitRequest);
-        $submitResponse = new Response();
-        $this->browser->send($submitRequest, $submitResponse);
+        $submitUrl->applyToRequest($request);
+        $this->cookieJar->addCookieHeaders($request);
+        $response = new Response();
+        $this->browser->send($request, $response);
+
+        return $response;
     }
 
     public function loginToSite(Account $account, Site $site)
@@ -62,10 +64,16 @@ class Poster
         $response = $this->browser->get($site->getLoginUrl());
         $this->cookieJar->processSetCookieHeaders(new Request(), $response);
         $crawler = new Crawler($response->getContent(), $site->getLoginUrl());
-        $loginForm = $crawler->selectButton($site->getLoginButton())->form(array(
-            $site->getLoginUsername() => $account->getUsername(),
-            $site->getLoginPassword() => $account->getPassword(),
-        ));
+        try {
+            $loginForm = $crawler->selectButton($site->getLoginButton())->form(
+                array(
+                    $site->getLoginUsername() => $account->getUsername(),
+                    $site->getLoginPassword() => $account->getPassword(),
+                )
+            );
+        } catch (\InvalidArgumentException $e) {
+            throw new LoginFormNotFoundException();
+        }
 
         $loginUrl = new Url($loginForm->getUri());
         $loginRequest = $this->browser->getMessageFactory()->createFormRequest($loginForm->getMethod());
@@ -78,17 +86,23 @@ class Poster
         $this->cookieJar->processSetCookieHeaders($loginRequest, $loginResponse);
     }
 
-    public function getSubmitForm($submitUrl, $submitButton)
+    public function getSubmitForm($url, $submitButton)
     {
-        $submitRequest = new Request();
-        $submitResponse = new Response();
-        $submitUrlObject = new Url($submitUrl);
-        $submitUrlObject->applyToRequest($submitRequest);
-        $this->cookieJar->addCookieHeaders($submitRequest);
-        $this->browser->send($submitRequest, $submitResponse);
+        $request = new Request();
+        $response = new Response();
+        $submitUrl = new Url($url);
+        $submitUrl->applyToRequest($request);
+        $this->cookieJar->clearExpiredCookies();
+        $this->cookieJar->addCookieHeaders($request);
+        $this->browser->send($request, $response);
 
-        $submitCrawler = new Crawler($submitResponse->getContent(), $submitUrl);
-        $submitForm = $submitCrawler->selectButton($submitButton)->form();
+        $submitCrawler = new Crawler($response->getContent(), $url);
+        try {
+            $submitForm = $submitCrawler->selectButton($submitButton)->form();
+        } catch (\InvalidArgumentException $e) {
+            throw new SubmitFormNotFoundException();
+        }
+
         return $submitForm;
     }
 }

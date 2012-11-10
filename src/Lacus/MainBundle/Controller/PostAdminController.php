@@ -3,6 +3,7 @@
 namespace Lacus\MainBundle\Controller;
 
 use Sonata\AdminBundle\Controller\CRUDController;
+use Symfony\Component\Security\Core\Exception\AccessDeniedException;
 use Lacus\MainBundle\Content\Exception\ValidationException;
 use Lacus\MainBundle\Content\ContentCollection;
 use Lacus\MainBundle\Entity\Mapper;
@@ -13,7 +14,7 @@ use Lacus\MainBundle\Content\Provider\AbstractProvider;
 use Lacus\MainBundle\Content\Content;
 use JMS\DiExtraBundle\Annotation as DI;
 
-class SiteAdminController extends CRUDController
+class PostAdminController extends CRUDController
 {
     /**
      * @var \Symfony\Component\Form\FormFactoryInterface
@@ -25,7 +26,7 @@ class SiteAdminController extends CRUDController
     /**
      * @DI\Inject("lacus.post.manager")
      *
-     * @var \Lacus\MainBundle\Post\Manager
+     * @var \Lacus\MainBundle\Post\PostManager
      */
     private $postManager;
 
@@ -38,14 +39,27 @@ class SiteAdminController extends CRUDController
 
     public function providerListAction()
     {
-        return $this->render('MainBundle:SiteAdmin:provider_list.html.twig', array(
-            'action' => 'provider_list',
-            'providers' => $this->providerPool->getProviderAliases(),
-        ));
+        /** @var $admin \Lacus\MainBundle\Admin\PostAdmin */
+        $admin = $this->admin;
+        if(!$admin->hasAccessToAnyProvider()) {
+            throw new AccessDeniedException();
+        }
+        return $this->render(
+            'MainBundle:PostAdmin:provider_list.html.twig',
+            array(
+                'action' => 'provider_list',
+                'providers' => $this->providerPool->getProviderAliases(),
+            )
+        );
     }
 
     public function providerAction($provider)
     {
+        /** @var $admin \Lacus\MainBundle\Admin\PostAdmin */
+        $admin = $this->admin;
+        if(!$admin->hasAccessToProvider($provider)) {
+            throw new AccessDeniedException();
+        }
         $activeProvider = $this->providerPool->getProvider($provider);
 
         $form = $this->getFilterForm($activeProvider);
@@ -56,29 +70,38 @@ class SiteAdminController extends CRUDController
 
         $mapped_posts = $this->getMappedPosts($contentCollection);
 
-        return $this->render('MainBundle:SiteAdmin:provider.html.twig', array(
-            'action' => 'provider',
-            'content_collection' => $contentCollection,
-            'current_provider_url' => $activeProvider->getActiveUrl(),
-            'current_provider_title' => $activeProvider->getActiveTitle(),
-            'provider_content_width' => $activeProvider->getContentTemplate()->getWidth(),
-            'form' => $form->createView(),
-            'current_provider' => $provider,
-            'providers' => $this->providerPool->getProviderAliases(),
-            'sites' => $sites,
-            'mapped_posts' => $mapped_posts,
-        ));
+        return $this->render(
+            'MainBundle:PostAdmin:provider.html.twig',
+            array(
+                'action' => 'provider',
+                'content_collection' => $contentCollection,
+                'current_provider_url' => $activeProvider->getActiveUrl(),
+                'current_provider_title' => $activeProvider->getActiveTitle(),
+                'provider_content_width' => $activeProvider->getContentTemplate()->getWidth(),
+                'form' => $form->createView(),
+                'current_provider' => $provider,
+                'providers' => $this->providerPool->getProviderAliases(),
+                'sites' => $sites,
+                'mapped_posts' => $mapped_posts,
+            )
+        );
     }
 
     public function getMappedPosts(ContentCollection $contentCollection)
     {
         /** @var $postRepository \Lacus\MainBundle\Entity\PostRepository */
         $postRepository = $this->getDoctrine()->getManager()->getRepository('MainBundle:Post');
+
         return $postRepository->fetchMappedPosts($contentCollection->getContentUuids());
     }
 
     public function providerFinalizeAction($provider, $mapperId)
     {
+        /** @var $admin \Lacus\MainBundle\Admin\PostAdmin */
+        $admin = $this->admin;
+        if(!$admin->hasAccessToProvider($provider)) {
+            throw new AccessDeniedException();
+        }
         /** @var $serializer \JMS\SerializerBundle\Serializer\Serializer */
         $contentSerialized = $this->getRequest()->request->get('content');
         $content = Content::getUnserialized($contentSerialized);
@@ -111,10 +134,13 @@ class SiteAdminController extends CRUDController
 
         $form = $this->getContentForm($post, $content);
 
-        return $this->render('MainBundle:SiteAdmin:provider_finalize.html.twig', array(
-            'form' => $form->createView(),
-            'post' => $post,
-        ));
+        return $this->render(
+            'MainBundle:PostAdmin:provider_finalize.html.twig',
+            array(
+                'form' => $form->createView(),
+                'post' => $post,
+            )
+        );
     }
 
     public function providerPostAction($mapperId)
@@ -137,19 +163,27 @@ class SiteAdminController extends CRUDController
         $form->bind($this->getRequest());
 
         if (!$form->isValid()) {
-            return $this->renderJson(array(
-                'status' => 'invalid',
-                'form' => $this->renderView('MainBundle:SiteAdmin:provider_finalize.html.twig', array(
-                    'form' => $form->createView(),
-                    'post' => $post,
-                )),
-            ));
+            return $this->renderJson(
+                array(
+                    'status' => 'invalid',
+                    'form' => $this->renderView(
+                        'MainBundle:PostAdmin:provider_finalize.html.twig',
+                        array(
+                            'form' => $form->createView(),
+                            'post' => $post,
+                        )
+                    ),
+                )
+            );
         } else {
             $this->getDoctrine()->getManager()->persist($post);
             $this->getDoctrine()->getManager()->flush();
-            return $this->renderJson(array(
-                'status' => 'success',
-            ));
+
+            return $this->renderJson(
+                array(
+                    'status' => 'success',
+                )
+            );
         }
     }
 
@@ -167,6 +201,7 @@ class SiteAdminController extends CRUDController
                 $post->setAccount($mapper->getDefaultAccount());
             }
         }
+
         return $post;
     }
 
@@ -176,15 +211,21 @@ class SiteAdminController extends CRUDController
         /** @var $siteRepository \Lacus\MainBundle\Entity\SiteRepository */
         $siteRepository = $sites = $em->getRepository('MainBundle:Site');
         $sites = $siteRepository->findAll();
+
         return $sites;
     }
 
     protected function getFilterForm(AbstractProvider $provider)
     {
         /** @var $formBuilder \Symfony\Component\Form\FormBuilderInterface */
-        $formBuilder = $this->formFactory->createNamedBuilder('', 'form', $provider, array(
-            'csrf_protection' => false,
-        ));
+        $formBuilder = $this->formFactory->createNamedBuilder(
+            '',
+            'form',
+            $provider,
+            array(
+                'csrf_protection' => false,
+            )
+        );
         $formBuilder->addEventSubscriber(new GenerateContentProviderForm($formBuilder->getFormFactory()));
 
         return $formBuilder->getForm();
@@ -194,10 +235,14 @@ class SiteAdminController extends CRUDController
     {
         $formBuilder = $this->formFactory->createNamedBuilder('finalize_form', 'form', $post);
         $formBuilder->addEventSubscriber(new GeneratePostForm($formBuilder->getFormFactory(), $content));
-        $formBuilder->add('_content', 'hidden', array(
-            'data' => $content->getSerialized(),
-            'mapped' => false,
-        ));
+        $formBuilder->add(
+            '_content',
+            'hidden',
+            array(
+                'data' => $content->getSerialized(),
+                'mapped' => false,
+            )
+        );
 
         return $formBuilder->getForm();
     }
@@ -217,9 +262,12 @@ class SiteAdminController extends CRUDController
         $paginator = $this->get('knp_paginator');
         $posts = $paginator->paginate($query, $page, 10);
 
-        return $this->render('MainBundle:SiteAdmin:queue.html.twig', array(
-            'posts' => $posts,
-        ));
+        return $this->render(
+            'MainBundle:PostAdmin:queue.html.twig',
+            array(
+                'posts' => $posts,
+            )
+        );
     }
 
     public function checkAction($provider)
@@ -228,14 +276,16 @@ class SiteAdminController extends CRUDController
 
         try {
             $contentCollection = $provider->getContentCollection();
-        } catch(ValidationException $ve) {
+        } catch (ValidationException $ve) {
 
         } catch (\Exception $e) {
 
         }
 
-        return $this->render('MainBundle:SiteAdmin:check.html.twig', array(
-        ));
+        return $this->render(
+            'MainBundle:PostAdmin:check.html.twig',
+            array()
+        );
     }
 
     public function checkProviderAction($provider)

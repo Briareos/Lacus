@@ -24,6 +24,13 @@ class Account
     private $id;
 
     /**
+     * @var string
+     *
+     * @ORM\Column(name="label", type="string", length=255)
+     */
+    private $label;
+
+    /**
      * @var string $username
      *
      * @ORM\Column(name="username", type="string", length=255)
@@ -191,5 +198,30 @@ class Account
     public function setDefaultForMappers($defaultForMappers)
     {
         $this->defaultForMappers = $defaultForMappers;
+    }
+
+    /**
+     * @return string
+     */
+    public function getLabel()
+    {
+        return $this->label;
+    }
+
+    /**
+     * @param string $label
+     */
+    public function setLabel($label)
+    {
+        $this->label = $label;
+    }
+
+    public function __toString()
+    {
+        if ($this->label === null) {
+            return $this->username;
+        }
+
+        return $this->label;
     }
 }

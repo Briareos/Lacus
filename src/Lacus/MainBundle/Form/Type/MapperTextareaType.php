@@ -24,16 +24,16 @@ class MapperTextareaType extends AbstractType
 
     public function setDefaultOptions(OptionsResolverInterface $resolver)
     {
-        $resolver->setDefaults(array(
-            'wysiwyg' => false,
-        ));
+        $resolver->setDefaults(
+            array(
+                'wysiwyg' => false,
+            )
+        );
     }
 
     public function buildView(FormView $view, FormInterface $form, array $options)
     {
-        if ($options['wysiwyg']) {
-            $view->vars['wysiwyg'] = true;
-        }
+        $view->vars['wysiwyg'] = $options['wysiwyg'];
     }
 
 

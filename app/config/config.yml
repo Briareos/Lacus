@@ -126,3 +126,22 @@ sonata_user:
             translation: messages
         group:
             translation: messages
+
+old_sound_rabbit_mq:
+    connections:
+        default:
+            host:      %rabbitmq_host%
+            port:      %rabbitmq_port%
+            user:      %rabbitmq_user%
+            password:  %rabbitmq_password%
+            vhost:     %rabbitmq_vhost%
+    producers:
+        post_poster:
+            connection: default
+            exchange_options: {name: 'post-poster', type: direct}
+    consumers:
+        post_poster:
+            connection: default
+            exchange_options: {name: 'post-poster', type: direct}
+            queue_options:    {name: 'post-poster'}
+            callback:         lacus.post.consumer

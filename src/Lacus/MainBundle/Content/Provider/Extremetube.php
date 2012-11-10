@@ -45,9 +45,6 @@ class Extremetube extends AbstractProvider
             'height' => 180,
         )))
             ->addField(new Segment\Title('title', array()))
-            ->addField(new Segment\Text('viewkey', array(
-            'display_on_list' => false,
-        )))
             ->addField(new Segment\Url('url', array(
             'display_on_list' => false,
         )))

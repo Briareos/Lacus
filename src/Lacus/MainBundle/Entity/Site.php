@@ -3,13 +3,12 @@
 namespace Lacus\MainBundle\Entity;
 
 use Doctrine\ORM\Mapping as ORM;
-use Application\Sonata\UserBundle\Entity\User;
 use Doctrine\Common\Collections\ArrayCollection;
 
 /**
  * Lacus\MainBundle\Entity\Site
  *
- * @ORM\Table()
+ * @ORM\Table(name="site")
  * @ORM\Entity(repositoryClass="Lacus\MainBundle\Entity\SiteRepository")
  */
 class Site
@@ -29,6 +28,13 @@ class Site
      * @ORM\Column(name="name", type="string", length=255)
      */
     private $name;
+
+    /**
+     * @var bool
+     *
+     * @ORM\Column(name="active", type="boolean")
+     */
+    private $active;
 
     /**
      * @var string $url
@@ -80,18 +86,22 @@ class Site
     private $mappers;
 
     /**
-     * @var User
+     * @var ArrayCollection
      *
-     * @ORM\ManyToOne(targetEntity="\Application\Sonata\UserBundle\Entity\User", inversedBy="sites")
-     * @ORM\JoinColumn(name="owner", referencedColumnName="id")
+     * @ORM\ManyToMany(targetEntity="Application\Sonata\UserBundle\Entity\User", inversedBy="sites")
+     * @ORM\JoinTable(name="site_user",
+     *      joinColumns={@ORM\JoinColumn(name="site_id", referencedColumnName="id")},
+     *      inverseJoinColumns={@ORM\JoinColumn(name="user_id", referencedColumnName="id")}
+     * )
      */
-    private $owner;
+    private $users;
 
 
     public function __construct()
     {
         $this->accounts = new ArrayCollection();
         $this->mappers = new ArrayCollection();
+        $this->managers = new ArrayCollection();
     }
 
     /**
@@ -183,22 +193,6 @@ class Site
     }
 
     /**
-     * @return \Application\Sonata\UserBundle\Entity\User
-     */
-    public function getOwner()
-    {
-        return $this->owner;
-    }
-
-    /**
-     * @param \Application\Sonata\UserBundle\Entity\User $owner
-     */
-    public function setOwner($owner)
-    {
-        $this->owner = $owner;
-    }
-
-    /**
      * @return string
      */
     public function getLoginButton()
@@ -212,14 +206,6 @@ class Site
     public function setLoginButton($loginButton)
     {
         $this->loginButton = $loginButton;
-    }
-
-    /**
-     * @param \Doctrine\Common\Collections\ArrayCollection $submitFormFieldMappers
-     */
-    public function setSubmitFormFieldMappers($submitFormFieldMappers)
-    {
-        $this->submitFormFieldMappers = $submitFormFieldMappers;
     }
 
     /**
@@ -280,5 +266,31 @@ class Site
             }
         }
         return $mappers;
+    }
+
+    /**
+     * @return boolean
+     */
+    public function getActive()
+    {
+        return $this->active;
+    }
+
+    /**
+     * @param boolean $active
+     */
+    public function setActive($active)
+    {
+        $this->active = $active;
+    }
+
+    public function getUsers()
+    {
+        return $this->users;
+    }
+
+    public function setUsers($users)
+    {
+        $this->users = $users;
     }
 }

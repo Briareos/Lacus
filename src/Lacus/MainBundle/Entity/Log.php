@@ -31,7 +31,7 @@ class Log
     /**
      * @var string $response
      *
-     * @ORM\Column(name="response", type="text")
+     * @ORM\Column(name="response", type="text", nullable=true)
      */
     private $response;
 
@@ -107,29 +107,6 @@ class Log
     public function getResponse()
     {
         return $this->response;
-    }
-
-    /**
-     * Set postData
-     *
-     * @param \stdClass $postData
-     * @return Log
-     */
-    public function setPostData($postData)
-    {
-        $this->postData = $postData;
-    
-        return $this;
-    }
-
-    /**
-     * Get postData
-     *
-     * @return \stdClass 
-     */
-    public function getPostData()
-    {
-        return $this->postData;
     }
 
     /**

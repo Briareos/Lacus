@@ -3,8 +3,10 @@
 namespace Lacus\MainBundle\Controller;
 
 use Sonata\AdminBundle\Controller\CRUDController;
+use Lacus\MainBundle\Post\Exception\LoginFormNotFoundException;
+use Lacus\MainBundle\Post\Exception\SubmitFormNotFoundException;
+use Symfony\Component\HttpKernel\Exception\HttpException;
 use Lacus\MainBundle\Form\Type\MapperConfigureFormType;
-use Symfony\Component\HttpKernel\Exception\NotFoundHttpException;
 use Symfony\Component\Security\Core\Exception\AccessDeniedException;
 use Lacus\MainBundle\Entity\Account;
 use Symfony\Component\Yaml\Yaml;
@@ -26,13 +28,20 @@ class MapperAdminController extends CRUDController
      */
     protected $session;
 
+    /**
+     * @DI\Inject("doctrine.orm.default_entity_manager")
+     *
+     * @var \Doctrine\ORM\EntityManager
+     */
+    protected $em;
+
     public function configureAction($id)
     {
         // the key used to lookup the template
         $object = $this->admin->getObject($id);
 
         if (!$object) {
-            throw new NotFoundHttpException(sprintf('unable to find the object with id : %s', $id));
+            throw $this->createNotFoundException('Mapper not found.');
         }
 
         if (false === $this->admin->isGranted('EDIT', $object)) {
@@ -56,44 +65,79 @@ class MapperAdminController extends CRUDController
             }
         }
 
-        return $this->render('MainBundle:MapperAdmin:configure.html.twig', array(
-            'action' => 'configure',
-            'object' => $object,
-            'form' => $form->createView(),
-            'content_template' => $contentTemplate,
-        ));
+        return $this->render(
+            'MainBundle:MapperAdmin:configure.html.twig',
+            array(
+                'action' => 'configure',
+                'object' => $object,
+                'form' => $form->createView(),
+                'content_template' => $contentTemplate,
+            )
+        );
     }
 
     public function getFieldsAction()
     {
+        if (!$this->getRequest()->isXmlHttpRequest()) {
+            throw new HttpException(400, 'This method is only available via XML-HTTP request.');
+        }
+
         $mapperId = $this->getRequest()->request->getInt('id');
         $accountId = $this->getRequest()->request->getInt('account');
 
-        $em = $this->getDoctrine()->getManager();
-        /** @var $account \Lacus\MainBundle\Entity\Account */
-        $account = $em->find('MainBundle:Account', $accountId);
-        /** @var $mapper \Lacus\MainBundle\Entity\Mapper */
-        $mapper = $em->find('MainBundle:Mapper', $mapperId);
 
-        if ($mapper->getSite() === null) {
-            return $this->renderJson(array(
-                'error' => "This mapper doesn't have an assigned site.",
-            ));
+        /** @var $account \Lacus\MainBundle\Entity\Account */
+        $account = $this->em->find('MainBundle:Account', $accountId);
+        /** @var $mapper \Lacus\MainBundle\Entity\Mapper */
+        $mapper = $this->em->find('MainBundle:Mapper', $mapperId);
+
+        if ($mapper === null) {
+            throw $this->createNotFoundException('Mapper not found.');
         }
 
-        /** @var $poster \Lacus\MainBundle\Post\Poster */
+        if ($mapper->getSite() === null) {
+            return $this->renderJson(
+                array(
+                    'status' => "KO",
+                    'message' => "This mapper doesn't have an assigned site.",
+                )
+            );
+        }
+
+        /** @var $poster \Lacus\MainBundle\Post\PostPoster */
         $poster = $this->get('lacus.post.poster');
 
         if ($mapper->getLoginRequired()) {
             if ($account === null) {
-                return $this->renderJson(array(
-                    'error' => "This mapper requires an account info to login.",
-                ));
+                return $this->renderJson(
+                    array(
+                        'status' => "KO",
+                        'message' => "This mapper requires an account info to login.",
+                    )
+                );
             }
-            $poster->loginToSite($account, $mapper->getSite());
+            try {
+                $poster->loginToSite($account, $mapper->getSite());
+            } catch (LoginFormNotFoundException $e) {
+                return $this->renderJson(
+                    array(
+                        'status' => "KO",
+                        'message' => "Unable to find the login form. Are you sure you provided the right login URL?",
+                    )
+                );
+            }
         }
 
-        $submitForm = $poster->getSubmitForm($mapper->getSubmitUrl(), $mapper->getSubmitButton());
+        try {
+            $submitForm = $poster->getSubmitForm($mapper->getSubmitUrl(), $mapper->getSubmitButton());
+        } catch (SubmitFormNotFoundException $e) {
+            return $this->renderJson(
+                array(
+                    'status' => "KO",
+                    'message' => "Unable to find the submit form. Perhaps the login credentials were invalid.",
+                )
+            );
+        }
 
         $formData = array(
             'fields' => $submitForm->getValues(),
@@ -112,8 +156,14 @@ class MapperAdminController extends CRUDController
             );
         }
 
-        $data = Yaml::dump($formData, 4, 2);
+        $mappedData = Yaml::dump($formData, 4, 2);
 
-        return $this->renderJson($data);
+        return $this->renderJson(
+            array(
+                'status' => "OK",
+                'message' => "Fields successfully fetched.",
+                'mapped_data' => $mappedData,
+            )
+        );
     }
 }

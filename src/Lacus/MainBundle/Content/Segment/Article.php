@@ -11,4 +11,15 @@ class Article extends AbstractSegment
         return 'article';
     }
 
+    public function getValue(array $options = array())
+    {
+        return $this->value;
+    }
+
+    public function getDefaultOptions()
+    {
+        return array(
+            'paragraph_to_break' => false,
+        );
+    }
 }

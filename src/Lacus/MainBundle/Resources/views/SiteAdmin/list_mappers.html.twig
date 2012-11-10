@@ -9,21 +9,35 @@
         </button>
         <ul class="dropdown-menu">
             {% set mappers_active = false %}
-            {% set mappers_configured = 0 %}
             {% for mapper in value %}
-                {% if field_description.hasassociationAdmin and field_description.associationAdmin.id(mapper) and field_description.associationAdmin.isGranted('EDIT') and field_description.associationAdmin.hasRoute('edit') %}
+                {% if field_description.hasAssociationAdmin and field_description.associationAdmin.id(mapper) and field_description.associationAdmin.isGranted('EDIT') and field_description.associationAdmin.hasRoute('edit') %}
                     {% set mappers_active = true %}
-                    <li><a href="{{ field_description.associationAdmin.generateObjectUrl('edit', mapper) }}">{{ mapper.name }} — <span class="label label-inverse">{{ mapper.provider|capitalize }}</span></a></li>
-                    {% if mapper.data %}
-                        {% set mappers_configured = mappers_configured + 1 %}
-                    {% endif %}
+                    {% set mapper_submenu = field_description.associationAdmin.isGranted('edit', object) or field_description.associationAdmin.isGranted('configure', object) %}
+                    <li class="{% if mapper_submenu %}dropdown-submenu{% endif %}">
+                        <a href="{{ field_description.associationAdmin.generateObjectUrl('edit', mapper) }}">
+                            {{ mapper.name }} — <span class="label label-inverse">{{ mapper.provider|capitalize }}</span>
+                        </a>
+                        {% if mapper_submenu %}
+                            <ul class="dropdown-menu">
+                                {% if field_description.associationAdmin.isGranted('edit',object) %}
+                                    <li><a href="{{ path('admin_lacus_main_mapper_edit',{'id':mapper.id}) }}">Edit</a></li>
+                                {% endif %}
+                                {% if field_description.associationAdmin.isGranted('configure',object) %}
+                                    <li><a href="{{ path('admin_lacus_main_mapper_configure',{'id':mapper.id}) }}">{{ mapper.configured ? 'Re-configure' : 'Configure' }}</a></li>
+                                {% endif %}
+                                {% if admin.getConfigurationPool().getAdminByAdminCode('sonata.main.admin.post').isGranted('LIST') %}
+                                    <li><a href="{{ path('admin_lacus_main_post_list') }}"><span class="badge badge-success">{{ mapper.posts|length }}</span> Posts</a></li>
+                                {% endif %}
+                            </ul>
+                        {% endif %}
+                    </li>
                 {% endif %}
             {% endfor %}
             {% if field_description.associationAdmin.isGranted('CREATE') and field_description.associationAdmin.hasRoute('create') %}
                 {% if mappers_active %}
                     <li class="divider"></li>
                 {% endif %}
-                <li><a href="{{ field_description.associationAdmin.generateUrl('create') }}"><i class="icon-list-alt"></i> Create a new mapper</a></li>
+                <li><a href="{{ field_description.associationAdmin.generateUrl('create') }}"><i class="icon-plus"></i> Create a new mapper</a></li>
             {% endif %}
         </ul>
     </div>

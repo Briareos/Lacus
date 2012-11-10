@@ -1,0 +1,11 @@
+{% extends 'SonataAdminBundle:CRUD:base_list_field.html.twig' %}
+
+{% block field %}
+    <div class="btn-group" data-toggle="buttons-radio">
+        <button type="button" class="btn btn-mini {% if value == 'draft' %} active{% endif %}">Draft</button>
+        <button type="button" class="btn btn-mini btn-warning {% if value == 'review' %}active{% endif %}">Review</button>
+        <button type="button" class="btn btn-mini btn-info {% if value == 'queue' %}active{% endif %}">Queue</button>
+        <button type="button" class="btn btn-mini btn-success {% if value == 'publish' %}active{% endif %}">Published</button>
+        <button type="button" class="btn btn-mini btn-inverse {% if value ==  'archive' %}active{% endif %}">Archived</button>
+    </div>
+{% endblock %}

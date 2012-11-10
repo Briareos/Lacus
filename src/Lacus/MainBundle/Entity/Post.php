@@ -27,6 +27,8 @@ class Post
 
     const STATUS_PUBLISH = 'publish';
 
+    const STATUS_ARCHIVE = 'archive';
+
     /**
      * @var integer $id
      *
@@ -60,7 +62,7 @@ class Post
     /**
      * @var ArrayCollection
      *
-     * @ORM\OneToMany(targetEntity="File", mappedBy="post", cascade={"persist", "remove"})
+     * @ORM\OneToMany(targetEntity="File", mappedBy="post", cascade={"persist", "remove"}, indexBy="fieldName")
      */
     private $files;
 
@@ -104,7 +106,7 @@ class Post
     /**
      * @var ArrayCollection
      *
-     * @ORM\OneToMany(targetEntity="Log", mappedBy="post")
+     * @ORM\OneToMany(targetEntity="Log", mappedBy="post", cascade={"persist"})
      */
     private $logs;
 
@@ -225,7 +227,7 @@ class Post
     public function addFile(File $file)
     {
         $file->setPost($this);
-        $this->files[] = $file;
+        $this->files[$file->getFieldName()] = $file;
     }
 
     public function getPostFiles()

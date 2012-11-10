@@ -3,7 +3,7 @@
 namespace Lacus\MainBundle\Form\Event;
 
 use Symfony\Component\EventDispatcher\EventSubscriberInterface;
-use Lacus\MainBundle\Post\Manager;
+use Lacus\MainBundle\Post\PostManager;
 use Lacus\MainBundle\Mapper\MapperDataTree;
 use Lacus\MainBundle\Entity\Post;
 use Lacus\MainBundle\Content\Content;
@@ -49,17 +49,22 @@ class GeneratePostForm implements EventSubscriberInterface
         $form = $event->getForm();
 
         $form->add(
-            $this->factory->createNamed('status', 'choice', null, array(
-                'expanded' => true,
-                'choices' => array(
-                    Post::STATUS_DRAFT => Post::STATUS_DRAFT,
-                    Post::STATUS_REVIEW => Post::STATUS_REVIEW,
-                    Post::STATUS_QUEUE => Post::STATUS_QUEUE,
-                    Post::STATUS_PUBLISH => Post::STATUS_PUBLISH,
-                ),
-                'read_only' => ($post->getStatus() === Post::STATUS_PUBLISH),
-                'disabled' => ($post->getStatus() === Post::STATUS_PUBLISH),
-            ))
+            $this->factory->createNamed(
+                'status',
+                'choice',
+                null,
+                array(
+                    'expanded' => true,
+                    'choices' => array(
+                        Post::STATUS_DRAFT => Post::STATUS_DRAFT,
+                        Post::STATUS_REVIEW => Post::STATUS_REVIEW,
+                        Post::STATUS_QUEUE => Post::STATUS_QUEUE,
+                        Post::STATUS_PUBLISH => Post::STATUS_PUBLISH,
+                    ),
+                    'read_only' => ($post->getStatus() === Post::STATUS_PUBLISH),
+                    'disabled' => ($post->getStatus() === Post::STATUS_PUBLISH),
+                )
+            )
         );
     }
 
@@ -75,8 +80,12 @@ class GeneratePostForm implements EventSubscriberInterface
         $contentBuilder = $this->factory->createNamed('content');
         $form->add($contentBuilder);
 
-        $filesBuilder = $this->factory->createNamed('post_files', 'form', null, array(
-        ));
+        $filesBuilder = $this->factory->createNamed(
+            'post_files',
+            'form',
+            null,
+            array()
+        );
         $form->add($filesBuilder);
 
         $published = ($post->getStatus() === Post::STATUS_PUBLISH);
@@ -92,21 +101,43 @@ class GeneratePostForm implements EventSubscriberInterface
 
     public function createFileField($name, $options, $segment, $readOnly = false)
     {
-        $field = $this->factory->createNamed($name, 'mapper_file', null, array(
-            'required' => false,
-            'read_only' => $readOnly,
-            'disabled' => $readOnly,
-        ));
+        $field = $this->factory->createNamed(
+            $name,
+            'mapper_file',
+            null,
+            array(
+                'required' => false,
+                'read_only' => $readOnly,
+                'disabled' => $readOnly,
+            )
+        );
+
         return $field;
     }
 
     public function createField($name, $options, $segment, $readOnly = false)
     {
         if (isset($options['value'])) {
-            return $this->factory->createNamed($name, 'hidden', null, array(
-                'required' => false,
-                'read_only' => true,
-            ));
+            return $this->factory->createNamed(
+                $name,
+                'hidden',
+                null,
+                array(
+                    'required' => false,
+                    'read_only' => true,
+                )
+            );
+        } elseif (isset($options['choices']) && is_array($options['choices'])) {
+            return $this->factory->createNamed(
+                $name,
+                'choice',
+                null,
+                array(
+                    'choices' => $options['choices'],
+                    'read_only' => $readOnly,
+                    'disabled' => $readOnly,
+                )
+            );
         } elseif (isset($options['default'])) {
             $fieldOptions = array(
                 'required' => false,
@@ -118,6 +149,7 @@ class GeneratePostForm implements EventSubscriberInterface
                 $fieldType = 'textarea';
                 $fieldOptions['attr']['rows'] = $options['rows'];
             }
+
             return $this->factory->createNamed($name, $fieldType, null, $fieldOptions);
         } elseif (isset($segment['name'])) {
             $contentField = $this->content->getField($segment['name']);
@@ -141,6 +173,7 @@ class GeneratePostForm implements EventSubscriberInterface
                     $fieldOptions['wysiwyg'] = true;
                 }
             }
+
             return $this->factory->createNamed($name, $fieldType, null, $fieldOptions);
         } else {
             throw new \RuntimeException('No field.value, field.default or segment.name options provided.');

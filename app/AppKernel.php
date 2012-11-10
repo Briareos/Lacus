@@ -31,8 +31,8 @@ class AppKernel extends Kernel
             new Sonata\UserBundle\SonataUserBundle('FOSUserBundle'),
             new Doctrine\Bundle\FixturesBundle\DoctrineFixturesBundle(),
             new Sensio\Bundle\BuzzBundle\SensioBuzzBundle(),
-            new JMS\SerializerBundle\JMSSerializerBundle(),
             new Knp\Bundle\PaginatorBundle\KnpPaginatorBundle(),
+            new OldSound\RabbitMqBundle\OldSoundRabbitMqBundle(),
             new Application\Sonata\UserBundle\ApplicationSonataUserBundle(),
             new Lacus\MainBundle\MainBundle(),
         );

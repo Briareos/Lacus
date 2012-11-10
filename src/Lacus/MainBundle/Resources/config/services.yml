@@ -1,11 +1,12 @@
 services:
     sonata.main.admin.site:
         class: Lacus\MainBundle\Admin\SiteAdmin
-        arguments: [null, Lacus\MainBundle\Entity\Site, MainBundle:SiteAdmin]
+        arguments: [null, Lacus\MainBundle\Entity\Site, SonataAdminBundle:CRUD]
         tags:
             - { name: sonata.admin, manager_type: orm, group: main_site, label: sites }
         calls:
             - [ setProviderPool, [ @lacus.content_provider.pool ] ]
+            - [ setSecurityContext, [ @security.context ] ]
     sonata.main.admin.account:
         class: Lacus\MainBundle\Admin\AccountAdmin
         arguments: [null, Lacus\MainBundle\Entity\Account, SonataAdminBundle:CRUD]
@@ -28,14 +29,22 @@ services:
         calls:
             - [ setProviderPool, [ @lacus.content_provider.pool ] ]
     lacus.post.poster:
-        class: Lacus\MainBundle\Post\Poster
+        class: Lacus\MainBundle\Post\PostPoster
         arguments: [ @buzz ]
     lacus.post.manager:
-        class: Lacus\MainBundle\Post\Manager
+        class: Lacus\MainBundle\Post\PostManager
         arguments: [ @doctrine.orm.default_entity_manager ]
-    lacus.post.listener:
-        class: Lacus\MainBundle\Listener\PostPoster
-        arguments: [ @lacus.post.poster ]
+    lacus.post.consumer:
+        class: Lacus\MainBundle\Post\PostConsumer
+        arguments: [ @lacus.post.poster, @doctrine.orm.default_entity_manager ]
+    lacus.post.watcher:
+        class: Lacus\MainBundle\Listener\PostWatcher
+        arguments: [ @old_sound_rabbit_mq.post_poster_producer ]
+        tags:
+            - { name: doctrine.event_listener, event: postPersist }
+            - { name: doctrine.event_listener, event: preUpdate }
+    lacus.file.listener:
+        class: Lacus\MainBundle\Listener\FileListener
         tags:
             - { name: doctrine.event_listener, event: postPersist }
             - { name: doctrine.event_listener, event: preUpdate }

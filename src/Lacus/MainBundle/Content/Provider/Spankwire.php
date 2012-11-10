@@ -213,6 +213,8 @@ class Spankwire extends AbstractProvider
             $contentUrl = $videoNode->filterXPath("//div[@class='thmb-wrapper']/a")->link()->getUri();
             $content->setUrl($contentUrl);
             $content->set('url', $contentUrl);
+            preg_match('{/video(\d+)/?$}',$contentUrl,$resultId);
+            $content->setId($resultId[1]);
             $collection->addContent($content);
         }
     }

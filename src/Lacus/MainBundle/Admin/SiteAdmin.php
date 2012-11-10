@@ -3,6 +3,7 @@
 namespace Lacus\MainBundle\Admin;
 
 use Sonata\AdminBundle\Admin\Admin;
+use Symfony\Component\Security\Core\SecurityContextInterface;
 use Lacus\MainBundle\Content\ProviderPool;
 use Sonata\AdminBundle\Show\ShowMapper;
 use Sonata\AdminBundle\Datagrid\ListMapper;
@@ -20,64 +21,58 @@ class SiteAdmin extends Admin
      */
     private $providerPool;
 
+    private $securityContext;
+
     public function setProviderPool(ProviderPool $providerPool)
     {
         $this->providerPool = $providerPool;
     }
 
-    protected function configureRoutes(RouteCollection $collection)
+    public function setSecurityContext(SecurityContextInterface $securityContext)
     {
-        // Address prefix: site
-        // Path prefix: admin_lacus_main_site_
-        $collection->add('provider', 'provider/{provider}', array(
-            '_controller' => 'MainBundle:SiteAdmin:provider',
-        ), array(
-            'provider' => '(' . implode('|', $this->providerPool->getProviderAliases()) . ')',
-        ));
-        $collection->add('provider_list', 'provider', array(
-            '_controller' => 'MainBundle:SiteAdmin:providerList',
-        ));
-        $collection->add('provider_finalize', 'provider/{provider}/{mapperId}/finalize', array(
-            '_controller' => 'MainBundle:SiteAdmin:providerFinalize',
-        ));
-        $collection->add('provider_post', 'provider/post/{mapperId}', array(
-            '_controller' => 'MainBundle:SiteAdmin:providerPost',
-        ));
-        $collection->add('queue', 'queue', array(
-            '_controller' => 'MainBundle:SiteAdmin:queue',
-        ));
-        $collection->add('check', 'check', array(
-            '_controller' => 'MainBundle:SiteAdmin:check',
-        ));
-        $collection->add('check', 'check', array(
-            '_controller' => 'MainBundle:SiteAdmin:check',
-        ));
-        $collection->add('check_provider', 'check/{provider}', array(
-            '_controller' => 'MainBundle:SiteAdmin:check',
-        ));
+        $this->securityContext = $securityContext;
     }
 
     protected function configureFormFields(FormMapper $form)
     {
         $form
-            ->with("General")
-            ->add('name')
-            ->add('url')
-            ->end()
-            ->with("Login data")
-            ->add('loginUrl', null, array(
-            'required' => false,
-        ))
-            ->add('loginUsername', null, array(
-            'required' => false,
-        ))
-            ->add('loginPassword', null, array(
-            'required' => false,
-        ))
-            ->add('loginButton', null, array(
-            'required' => false,
-        ))
-            ->end();
+          ->with("General")
+          ->add('name')
+          ->add('url')
+          ->end()
+          ->with("Management")
+          ->add('users')
+          ->end()
+          ->with("Login data")
+          ->add(
+            'loginUrl',
+            null,
+            array(
+                'required' => false,
+            )
+        )
+          ->add(
+            'loginUsername',
+            null,
+            array(
+                'required' => false,
+            )
+        )
+          ->add(
+            'loginPassword',
+            null,
+            array(
+                'required' => false,
+            )
+        )
+          ->add(
+            'loginButton',
+            null,
+            array(
+                'required' => false,
+            )
+        )
+          ->end();
     }
 
     protected function configureListFields(ListMapper $list)
@@ -86,26 +81,90 @@ class SiteAdmin extends Admin
 
         $mapperAdmin = $this->getConfigurationPool()->getAdminByClass('Lacus\MainBundle\Entity\Mapper');
         if ($mapperAdmin->isGranted('LIST')) {
-            $list->add('mappers', null, array(
-                'template' => 'MainBundle:SiteAdmin:list_mappers.html.twig',
-            ));
+            $list->add(
+                'mappers',
+                null,
+                array(
+                    'template' => 'MainBundle:SiteAdmin:list_mappers.html.twig',
+                )
+            );
         }
 
         $postAdmin = $this->getConfigurationPool()->getAdminByClass('Lacus\MainBundle\Entity\Post');
         if ($postAdmin->isGranted('LIST')) {
-            $list->add('posts', null, array(
-                'template' => 'MainBundle:SiteAdmin:list_posts.html.twig',
-            ));
+            $list->add(
+                'posts',
+                null,
+                array(
+                    'template' => 'MainBundle:SiteAdmin:list_posts.html.twig',
+                )
+            );
         }
 
-        $list->add('url');
+        $list->add(
+            'url',
+            null,
+            array()
+        );
     }
 
     protected function configureShowFields(ShowMapper $filter)
     {
         $filter
-            ->add('name')
-            ->add('url');
+          ->add('name')
+          ->add('url');
+    }
+
+    public function isGranted($name, $object = null)
+    {
+        /** @var $object \Lacus\MainBundle\Entity\Site */
+        if ($name === 'VIEW') {
+            return $this->isGranted('LIST') || ($this->isGranted('EDIT_OWN') && $object->getOwner() && $this->getUser() && $object->getOwner()->getId() === $this->getUser()->getId());
+        }
+
+        return parent::isGranted($name, $object);
+    }
+
+    /**
+     * @return null|\Symfony\Component\Security\Core\User\UserInterface
+     */
+    public function getUser()
+    {
+        if (null === $token = $this->securityContext->getToken()) {
+            return null;
+        }
+
+        if (!is_object($user = $token->getUser())) {
+            return null;
+        }
+
+        return $user;
+    }
+
+    public function createQuery($context = 'list')
+    {
+        if ($context === 'list') {
+            /** @var $query \Doctrine\ORM\QueryBuilder */
+            $query = $this->getModelManager()->createQuery($this->getClass());
+            $query->leftJoin('o.mappers', 'm');
+            $query->addSelect('m');
+
+            foreach ($this->extensions as $extension) {
+                $extension->configureQuery($this, $query, $context);
+            }
+
+            return $query;
+        }
+
+        return parent::createQuery($context);
+    }
+
+
+    public function getSecurityInformation()
+    {
+        return parent::getSecurityInformation() + array(
+            'EDIT_OWN' => array(),
+        );
     }
 
 

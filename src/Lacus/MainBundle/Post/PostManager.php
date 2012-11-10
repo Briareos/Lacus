@@ -10,7 +10,7 @@ use Doctrine\ORM\EntityManager;
 use Lacus\MainBundle\Content\Content;
 use Lacus\MainBundle\Post\FieldNameConverterTrait;
 
-class Manager
+class PostManager
 {
     use FieldNameConverterTrait;
 
@@ -21,9 +21,17 @@ class Manager
         $this->em = $em;
     }
 
+    /**
+     * Populates a post with content data, using mapper data with field definitions. It also
+     * creates file instances and assigns them to the post. This process will override post's
+     * content and files.
+     *
+     * @param \Lacus\MainBundle\Entity\Post $post
+     * @param \Lacus\MainBundle\Content\Content $content
+     */
     public function populatePostWithContentData(Post $post, Content $content)
     {
-        $mapperData = MapperDataTree::filter(Yaml::parse($post->getMapper()->getData()));
+        $mapperData = MapperDataTree::parse($post->getMapper()->getData());
         $contentData = $this->getPostFields($mapperData['fields'], $content);
         $post->setContent($contentData);
 

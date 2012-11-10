@@ -1,0 +1,5 @@
+{% if admin.isGranted('CONFIGURE', object) and admin.hasRoute('configure') %}
+    <a href="{{ admin.generateObjectUrl('configure', object) }}" class="btn btn-mini">
+        <i class="icon-wrench"></i> Configure
+    </a>
+{% endif %}

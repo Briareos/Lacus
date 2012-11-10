@@ -271,4 +271,25 @@ class Mapper
     {
         $this->defaultAccount = $defaultAccount;
     }
+
+    /**
+     * @return \Doctrine\Common\Collections\ArrayCollection
+     */
+    public function getPosts()
+    {
+        return $this->posts;
+    }
+
+    /**
+     * @param \Doctrine\Common\Collections\ArrayCollection $posts
+     */
+    public function setPosts($posts)
+    {
+        $this->posts = $posts;
+    }
+
+    public function isConfigured()
+    {
+        return $this->data !== null;
+    }
 }

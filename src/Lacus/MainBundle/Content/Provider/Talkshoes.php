@@ -138,6 +138,7 @@ class Talkshoes extends AbstractProvider
             'ul', 'ol', 'li',
             'dl', 'dt', 'dd',
         ));
+        $text = $tagsFilter->filter($text);
         return $text;
     }
 

@@ -17,12 +17,9 @@ $(function () {
     });
 
     window.attach = function ($context) {
-        $('textarea[data-wysiwyg]', $context).wysihtml5({
-            stylesheets:false,
-            image:false,
-            color:false,
-            tags: {
-            }
+        $('textarea[data-wysiwyg="1"]:not(:disabled)', $context).redactor({
         });
     };
+
+    window.attach($('body'));
 });

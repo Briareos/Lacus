@@ -4,6 +4,7 @@ namespace Lacus\MainBundle\Entity;
 
 use Doctrine\ORM\Mapping as ORM;
 use Symfony\Component\HttpFoundation\File\UploadedFile;
+use Symfony\Component\HttpFoundation\File\File as HttpFile;
 
 /**
  * Lacus\MainBundle\Entity\File
@@ -47,7 +48,7 @@ class File
     /**
      * @var string $remotePath
      *
-     * @ORM\Column(name="remotePath", type="text")
+     * @ORM\Column(name="remotePath", type="text", nullable=true)
      */
     private $remotePath;
 
@@ -74,10 +75,30 @@ class File
     private $post;
 
     /**
-     * @var UploadedFile
+     * @var HttpFile
      */
     private $file;
 
+    /**
+     * @var \DateTime
+     *
+     * @ORM\Column(name="createdAt", type="datetime")
+     */
+    private $createdAt;
+
+    /**
+     * @var \DateTime
+     *
+     * @ORM\Column(name="updatedAt", type="datetime")
+     */
+    private $updatedAt;
+
+
+    public function __construct()
+    {
+        $this->createdAt = new \DateTime();
+        $this->updatedAt = new \DateTime();
+    }
 
     /**
      * Get id
@@ -254,8 +275,9 @@ class File
         return $this->file;
     }
 
-    public function setFile(UploadedFile $file)
+    public function setFile(HttpFile $file)
     {
+        $this->updatedAt = new \DateTime();
         $this->file = $file;
     }
 
@@ -263,15 +285,59 @@ class File
      * @ORM\PrePersist()
      * @ORM\PreUpdate()
      */
-    public function preUpload()
+    public function prePersist()
     {
-        if (null !== $this->file) {
-            // do whatever you want to generate a unique name
-            $this->localPath = sha1(uniqid(mt_rand(), true)) . '.' . $this->file->guessExtension();
-            $this->mimetype = $this->file->getMimeType();
-            $this->size = $this->file->getSize();
+        if (null === $this->file) {
+            if ($this->remotePath) {
+                $this->file = $this->downloadRemoteFile($this->remotePath);
+            } else {
+                return;
+            }
+        } else {
+            if ($this->remotePath) {
+                $this->remotePath = null;
+            }
+            if ($this->localPath) {
+                $this->removeUpload();
+            }
+        }
+        // do whatever you want to generate a unique name
+        $fileName = sha1(uniqid(mt_rand(), true));
+        $guessedExtension = $this->file->guessExtension();
+        if ($guessedExtension === null) {
+            $guessedExtension = 'bin';
+        }
+        $this->localPath = $fileName . '.' . $guessedExtension;
+
+        $this->mimetype = $this->file->getMimeType();
+        $this->size = $this->file->getSize();
+
+        if ($this->file instanceof UploadedFile) {
             $this->fileName = $this->file->getClientOriginalName();
         }
+        if ($this->fileName === null) {
+            $this->fileName = $this->localPath;
+        }
+    }
+
+    public function downloadRemoteFile($remotePath)
+    {
+        $ch = curl_init($remotePath);
+        curl_setopt_array(
+            $ch,
+            array(
+                CURLOPT_RETURNTRANSFER => true,
+                CURLOPT_CONNECTTIMEOUT => 5,
+            )
+        );
+        $fileContents = curl_exec($ch);
+        $fileLocation = tempnam('lacus', 'file');
+        $fileSaved = file_put_contents($fileLocation, $fileContents);
+        if ($fileSaved === false) {
+            throw new \RuntimeException(sprintf('Could not save the file to location "%s".', $fileLocation));
+        }
+
+        return new HttpFile($fileLocation);
     }
 
     /**
@@ -293,12 +359,48 @@ class File
     }
 
     /**
-     * @ORM\PostRemove()
+     * @ORM\PreRemove()
      */
     public function removeUpload()
     {
         if ($file = $this->getAbsolutePath()) {
             unlink($file);
+            $this->setFileName(null);
+            $this->setLocalPath(null);
+            $this->setSize(null);
+            $this->setMimetype(null);
         }
+    }
+
+    /**
+     * @return \DateTime
+     */
+    public function getUpdatedAt()
+    {
+        return $this->updatedAt;
+    }
+
+    /**
+     * @param \DateTime $updatedAt
+     */
+    public function setUpdatedAt($updatedAt)
+    {
+        $this->updatedAt = $updatedAt;
+    }
+
+    /**
+     * @return \DateTime
+     */
+    public function getCreatedAt()
+    {
+        return $this->createdAt;
+    }
+
+    /**
+     * @param \DateTime $createdAt
+     */
+    public function setCreatedAt($createdAt)
+    {
+        $this->createdAt = $createdAt;
     }
 }

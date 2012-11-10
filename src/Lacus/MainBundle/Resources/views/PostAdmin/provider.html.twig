@@ -30,7 +30,7 @@
                     <ul class="dropdown-menu">
                         {% for provider_name in providers %}
                             <li class="{{ current_provider == provider_name ? 'active' : '' }}"><a
-                                    href="{{ path('admin_lacus_main_site_provider',{'provider':provider_name}) }}">{{ provider_name|capitalize }}</a>
+                                    href="{{ path('admin_lacus_main_post_provider',{'provider':provider_name}) }}">{{ provider_name|capitalize }}</a>
                             </li>
                         {% endfor %}
                     </ul>
@@ -39,7 +39,7 @@
             </div>
 
             <form method="get" {{ form_enctype(form) }}
-                  action="{{ path('admin_lacus_main_site_provider',{'provider':current_provider}) }}">
+                  action="{{ path('admin_lacus_main_post_provider',{'provider':current_provider}) }}">
                 <div class="input-prepend input-append">
                     <label title="Search" for="{{ form.search.vars.id }}" class="add-on"><i class="icon-search"></i></label>
                     {{ form_widget(form.search) }}
@@ -81,7 +81,7 @@
                 <div class="form-actions">
                     <button type="submit" class="btn btn-primary">Submit</button>
                     <a class="btn"
-                       href="{{ path('admin_lacus_main_site_provider',{'provider':current_provider}) }}">Reset
+                       href="{{ path('admin_lacus_main_post_provider',{'provider':current_provider}) }}">Reset
                         all</a>
                 </div>
             </form>
@@ -201,7 +201,7 @@
                                         {% if site.getMappersFor(current_provider)|length %}
                                             {% for mapper in site.getMappersFor(current_provider) %}
                                                 <li>
-                                                    <a href="{{ path('admin_lacus_main_site_provider_finalize',{'provider':current_provider,'mapperId':mapper.id}) }}" data-mapper data-content="{{ content.uuid }}">
+                                                    <a href="{{ path('admin_lacus_main_post_provider_finalize',{'provider':current_provider,'mapperId':mapper.id}) }}" data-mapper data-content="{{ content.uuid }}">
                                                         {{ mapper.name }}
                                                         {% if mapped_posts[mapper.id][content.uuid] is defined %}
                                                             {% set mapped_post = mapped_posts[mapper.id][content.uuid] %}
@@ -212,7 +212,8 @@
                                             {% endfor %}
                                         {% endif %}
                                         <li>
-                                            <a href="{{ path('admin_lacus_main_mapper_create',{'siteId':site.id,'provider':current_provider}) }}"><i class="icon-list-alt"></i> Create a new mapper</a></li>
+                                            <a href="{{ path('admin_lacus_main_mapper_create',{'siteId':site.id,'provider':current_provider}) }}"><i class="icon-plus"></i> Create a new mapper</a>
+                                        </li>
                                     {% endfor %}
                                 {% else %}
                                     <li><a href="{{ path('admin_lacus_main_site_create') }}"><i class="icon-warning-sign"></i> No sites configured, click here to create a new one</a></li>

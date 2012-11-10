@@ -1,14 +1,18 @@
 {% extends 'form_div_layout.html.twig' %}
 
 {% block mapper_file_widget %}
-    {{ form_widget(form) }}
-    {% if form.vars.value and form.vars.value.getWebPath() is not null %}
-<a href="{{ asset(form.vars.value.getWebPath()) }}">{{ form.vars.value.getFileName() }}</a>
-{% endif %}
+    <fieldset>
+        {{ form_widget(form) }}
+        {% if form.vars.value and form.vars.value.getWebPath() is not null %}
+            <div class="controls">
+                <i class="icon-file"></i> <a href="{{ asset(form.vars.value.getWebPath()) }}">{{ form.vars.value.getFileName() }}</a>
+            </div>
+        {% endif %}
+    </fieldset>
 {% endblock %}
 
 {% block mapper_textarea_widget %}
-    {{ form_widget(form,{'attr':{'data-wysiwyg':true }}) }}
+    {{ form_widget(form,{'attr':{'data-wysiwyg':wysiwyg }}) }}
 {% endblock %}
 
 {% block mapper_data_widget %}
@@ -16,6 +20,8 @@
         $(function () {
             $('#{{ id }}-get-fields').click(function () {
                 var $button = $(this);
+                var $container = $($(this).data('container'));
+                var $messages = $($(this).data('messages'));
                 $.ajax({
                     url:'{{ path('admin_lacus_main_mapper_get_fields') }}',
                     type:'POST',
@@ -24,25 +30,32 @@
                         id:$('#{{ form.parent['id'].vars.id }}').val()
                     },
                     beforeSend:function () {
-                        $('#{{ id }}-messages').slideUp(function () {
+                        $messages.slideUp(function () {
                             $(this).html('');
                         });
                         $button.button('loading');
                     },
                     success:function (data) {
                         $button.button('reset');
-                        if (data.error) {
-                            $('#{{ id }}-messages').append($('<div class="alert"><button type="button" class="close" data-dismiss="alert">×</button></div>').append(data.error)).slideDown();
+                        if (data.status === 'OK') {
+                            $messages.append($('<div class="alert alert-success"><button type="button" class="close" data-dismiss="alert">×</button></div>').append(data.message)).slideDown();
+                            $container.val(data.mapped_data);
                         } else {
-                            $('#{{ id }}').val(data);
+                            $messages.append($('<div class="alert"><button type="button" class="close" data-dismiss="alert">×</button></div>').append(data.message)).slideDown();
+                            $container.val('');
                         }
+                    },
+                    error:function (jxhr, status, error) {
+                        $messages.append($('<div class="alert alert-error"><button type="button" class="close" data-dismiss="alert">×</button></div>').append(error)).slideDown();
+                        $button.button('reset');
+                        $container.val('');
                     }
                 });
             });
         });
     </script>
     <p>
-        <button class="btn" type="button" id="{{ id }}-get-fields">Fetch form fields</button>
+        <button data-messages="#{{ id }}-messages" data-container="#{{ id }}" class="btn" type="button" id="{{ id }}-get-fields">Fetch form fields</button>
     </p>
     <div id="{{ id }}-messages" class="hide"></div>
 
