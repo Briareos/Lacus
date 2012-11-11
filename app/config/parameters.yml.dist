@@ -10,7 +10,7 @@ parameters:
     mailer_user:        null
     mailer_password:    null
     locale:             en
-    secret:             null
+    secret:             change-this
     database_path:      null
 
     rabbitmq_host:      localhost
