@@ -10,3 +10,5 @@ app/logs/*
 app/config/parameters.yml
 build/
 vendor
+backups
+certs
