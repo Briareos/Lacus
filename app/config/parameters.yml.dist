@@ -1,14 +1,20 @@
 parameters:
-    database_driver: pdo_mysql
-    database_host: localhost
-    database_port: null
-    database_name: symfony
-    database_user: root
-    database_password: null
-    mailer_transport: smtp
-    mailer_host: localhost
-    mailer_user: null
-    mailer_password: null
-    locale: en
-    secret: 
-    database_path: null
+    database_driver:    pdo_mysql
+    database_host:      localhost
+    database_port:      null
+    database_name:      lacus
+    database_user:      root
+    database_password:  null
+    mailer_transport:   smtp
+    mailer_host:        localhost
+    mailer_user:        null
+    mailer_password:    null
+    locale:             en
+    secret:             null
+    database_path:      null
+
+    rabbitmq_host:      localhost
+    rabbitmq_port:      5672
+    rabbitmq_user:      guest
+    rabbitmq_password:  guest
+    rabbitmq_vhost:     /
