@@ -5,7 +5,7 @@ set :app_path,    "app"
 
 set :use_sudo,    false
 set :user,        "cooleryc"
-set :server_user  "apache"
+set :server_user, "apache"
 
 set :repository,  "git://github.com/Briareos/Lacus.git"
 set :scm,         :git
@@ -37,8 +37,8 @@ end
 
 task :make_cache_writable do
   current_path = deploy_to + "/current"
-  try_sudo "setfacl -R -m u:#{server_user}:rwx -m u:#{user}:rwx current/app/cache"
-  try_sudo "setfacl -dR -m u:#{server_user}:rwx -m u:#{user}:rwx current/app/cache"
+  try_sudo "setfacl -R -m u:#{server_user}:rwx -m u:#{user}:rwx #{deploy_to}/current/app/cache"
+  try_sudo "setfacl -dR -m u:#{server_user}:rwx -m u:#{user}:rwx #{deploy_to}/current/app/cache"
 end
 
 task :make_uploads_writable do
