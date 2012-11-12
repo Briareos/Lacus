@@ -102,6 +102,7 @@ class Site
         $this->accounts = new ArrayCollection();
         $this->mappers = new ArrayCollection();
         $this->managers = new ArrayCollection();
+        $this->active = false;
     }
 
     /**
@@ -265,6 +266,7 @@ class Site
                 $mappers[] = $mapper;
             }
         }
+
         return $mappers;
     }
 

@@ -38,7 +38,11 @@ class SiteAdmin extends Admin
         $form
           ->with("General")
           ->add('name')
-          ->add('url')
+          ->add('url');
+        if ($this->isGranted('MASTER', $this->getSubject())) {
+            $form->add('active');
+        }
+        $form
           ->end()
           ->with("Management")
           ->add('users')
@@ -78,6 +82,14 @@ class SiteAdmin extends Admin
     protected function configureListFields(ListMapper $list)
     {
         $list->addIdentifier('name');
+
+        $list->add(
+            'active',
+            null,
+            array(
+                'editable' => $this->isGranted('MASTER', $this->getSubject()),
+            )
+        );
 
         $mapperAdmin = $this->getConfigurationPool()->getAdminByClass('Lacus\MainBundle\Entity\Mapper');
         if ($mapperAdmin->isGranted('LIST')) {

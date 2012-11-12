@@ -62,16 +62,8 @@ class MapperAdmin extends Admin
 
     protected function configureFormFields(FormMapper $form)
     {
-        $form
-          ->with("General")
-          ->add('name')
-          ->add(
-            'active',
-            null,
-            array(
-                'required' => false,
-            )
-        );
+        $form->with("General")
+          ->add('name');
         if (!$this->getSubject()->getId()) {
             $form->add(
                 'site',
@@ -88,9 +80,9 @@ class MapperAdmin extends Admin
                 )
             );
         }
-        $form
-          ->end()
-          ->with("Posting options")
+        $form->end();
+
+        $form->with("Posting options")
           ->add(
             'loginRequired',
             null,

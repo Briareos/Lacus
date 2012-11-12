@@ -19,7 +19,6 @@ class AppKernel extends Kernel
             new JMS\AopBundle\JMSAopBundle(),
             new JMS\DiExtraBundle\JMSDiExtraBundle($this),
             new JMS\SecurityExtraBundle\JMSSecurityExtraBundle(),
-
             new Sonata\CacheBundle\SonataCacheBundle(),
             new Sonata\jQueryBundle\SonatajQueryBundle(),
             new Sonata\BlockBundle\SonataBlockBundle(),
@@ -33,6 +32,7 @@ class AppKernel extends Kernel
             new Sensio\Bundle\BuzzBundle\SensioBuzzBundle(),
             new Knp\Bundle\PaginatorBundle\KnpPaginatorBundle(),
             new OldSound\RabbitMqBundle\OldSoundRabbitMqBundle(),
+            new Doctrine\Bundle\MigrationsBundle\DoctrineMigrationsBundle(),
             new Application\Sonata\UserBundle\ApplicationSonataUserBundle(),
             new Lacus\MainBundle\MainBundle(),
         );

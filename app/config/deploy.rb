@@ -5,6 +5,7 @@ set :app_path,    "app"
 
 set :use_sudo,    false
 set :user,        "cooleryc"
+set :server_user  "apache"
 
 set :repository,  "git://github.com/Briareos/Lacus.git"
 set :scm,         :git
@@ -34,4 +35,25 @@ task :upload_parameters do
   top.upload(origin_file, destination_file)
 end
 
+task :make_cache_writable do
+  current_path = deploy_to + "/current"
+  try_sudo "setfacl -R -m u:#{server_user}:rwx -m u:#{user}:rwx current/app/cache"
+  try_sudo "setfacl -dR -m u:#{server_user}:rwx -m u:#{user}:rwx current/app/cache"
+end
+
+task :make_uploads_writable do
+  try_sudo "setfacl -R -m u:#{server_user}:rwx -m u:#{user}:rwx shared/app/logs"
+  try_sudo "setfacl -dR -m u:#{server_user}:rwx -m u:#{user}:rwx shared/app/logs"
+end
+
+task :make_uploads_writable do
+  current_path = deploy_to + "/current"
+  try_sudo "setfacl -R -m u:#{server_user}:rwx -m u:#{user}:rwx shared/web/uploads"
+  try_sudo "setfacl -dR -m u:#{server_user}:rwx -m u:#{user}:rwx shared/web/uploads"
+end
+
 after "deploy:setup", "upload_parameters"
+after "deploy", "make_cache_writable"
+
+# setfacl -R -m u:apache:rwx -m u:cooleryc:rwx current/app/cache shared/app/logs shared/web/uploads
+# setfacl -dR -m u:apache:rwx -m u:cooleryc:rwx current/app/cache shared/app/logs shared/web/uploads

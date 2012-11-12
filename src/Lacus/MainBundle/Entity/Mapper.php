@@ -80,13 +80,6 @@ class Mapper
     private $posts;
 
     /**
-     * @var bool
-     *
-     * @ORM\Column(name="active", type="boolean")
-     */
-    private $active;
-
-    /**
      * @var Account
      *
      * @ORM\ManyToOne(targetEntity="Account", inversedBy="defaultForMappers")
@@ -238,22 +231,6 @@ class Mapper
     public function setLoginRequired($loginRequired)
     {
         $this->loginRequired = $loginRequired;
-    }
-
-    /**
-     * @return boolean
-     */
-    public function getActive()
-    {
-        return $this->active;
-    }
-
-    /**
-     * @param boolean $active
-     */
-    public function setActive($active)
-    {
-        $this->active = $active;
     }
 
     /**
