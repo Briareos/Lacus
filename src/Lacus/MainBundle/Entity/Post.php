@@ -10,7 +10,7 @@ use Lacus\MainBundle\Post\FieldNameConverterTrait;
 /**
  * Lacus\MainBundle\Entity\Post
  *
- * @ORM\Table()
+ * @ORM\Table(name="post")
  * @ORM\Entity(repositoryClass="Lacus\MainBundle\Entity\PostRepository")
  */
 class Post

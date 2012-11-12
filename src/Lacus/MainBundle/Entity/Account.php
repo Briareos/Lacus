@@ -9,7 +9,7 @@ use Buzz\Util\CookieJar;
 /**
  * Lacus\MainBundle\Entity\Account
  *
- * @ORM\Table()
+ * @ORM\Table(name="account")
  * @ORM\Entity(repositoryClass="Lacus\MainBundle\Entity\AccountRepository")
  */
 class Account

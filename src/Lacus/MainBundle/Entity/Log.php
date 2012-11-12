@@ -7,7 +7,7 @@ use Doctrine\ORM\Mapping as ORM;
 /**
  * Lacus\MainBundle\Entity\Log
  *
- * @ORM\Table()
+ * @ORM\Table(name="log")
  * @ORM\Entity(repositoryClass="Lacus\MainBundle\Entity\LogRepository")
  */
 class Log

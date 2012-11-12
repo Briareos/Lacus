@@ -9,7 +9,7 @@ use Symfony\Component\HttpFoundation\File\File as HttpFile;
 /**
  * Lacus\MainBundle\Entity\File
  *
- * @ORM\Table()
+ * @ORM\Table(name="file")
  * @ORM\Entity(repositoryClass="Lacus\MainBundle\Entity\FileRepository")
  * @ORM\HasLifecycleCallbacks
  */
