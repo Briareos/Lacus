@@ -26,19 +26,25 @@ class Talkshoes extends AbstractProvider
     public function populateContentTemplate(Content $contentTemplate)
     {
         $contentTemplate
-            ->addField(new Segment\Title('title'))
-            ->addField(new Segment\Image('image', array(
-            'width' => 540,
-        )))
-            ->addField(new Segment\Tags('tags'))
-            ->addField(new Segment\Url('url', array(
-            'display_on_list' => false,
-        )))
-            ->addField(new Segment\Article('article_excerpt'))
-            ->addField(new Segment\Article('article', array(
-            'visible_on_list' => false,
-        )))
-            ->setWidth(540);
+          ->addField(new Segment\Title('title'))
+          ->addField(
+            new Segment\Image('image', array(
+                'width' => 540,
+            ))
+        )
+          ->addField(new Segment\Tags('tags'))
+          ->addField(
+            new Segment\Url('url', array(
+                'display_on_list' => false,
+            ))
+        )
+          ->addField(new Segment\Article('article_excerpt'))
+          ->addField(
+            new Segment\Article('article', array(
+                'visible_on_list' => false,
+            ))
+        )
+          ->setWidth(540);
     }
 
     public function isSearchable()
@@ -82,10 +88,13 @@ class Talkshoes extends AbstractProvider
             $content->set('tags', $arrayCategories);
             $paragraphs = $postNode->filterXPath('//div[@class="post"]/p');
             $article = '';
-            foreach ($paragraphs as $i => $paragraphDomNode) {
+            foreach ($paragraphs as $j => $paragraphDomNode) {
                 /** @var $paragraph \DOMNode */
                 $paragraphNode = new Crawler($paragraphDomNode, $url);
-                $article .= $this->filterParagraph($paragraphNode, $i, $paragraphs->count());
+                $article .= $this->filterParagraph($paragraphNode, $j, $paragraphs->count());
+            }
+            if (empty($article)) {
+                $article = '<em>Empty.</em>';
             }
             $content->set('article_excerpt', $article);
             preg_match('{//www\.talkshoes\.com/(\d+)/}', $content->getUrl(), $resultId);
@@ -104,7 +113,7 @@ class Talkshoes extends AbstractProvider
      * @param int $total
      * @return string
      */
-    public function filterParagraph(Crawler $paragraph, $index = 0, $total = 0)
+    public function filterParagraph(Crawler $paragraph, $index = 0, $total = 0, $fullView = false)
     {
         $text = '';
         foreach ($paragraph as $p) {
@@ -114,15 +123,23 @@ class Talkshoes extends AbstractProvider
                 if ($p->hasChildNodes() && $p->firstChild->tagName === 'img' || ($p->firstChild->hasChildNodes() && $p->firstChild->firstChild->tagName === 'img')) {
                     $p->removeChild($p->firstChild);
                 }
-            } elseif ($index === $total - 1) {
-                // Last paragraph in listing is "read more" link, in full view is "related posts".
-                continue;
             }
             $paragraphText = $p->ownerDocument->saveXML($p);
-            if ($index === 0) {
-                // First paragraph MAY contain text when stripped off of /a/img or /img, so we should remove it only if it's empty.
-                $paragraphText = str_replace(array('<p/>', '<p></p>'), '', $paragraphText);
+            if ($index === $total - 1) {
+                // Last paragraph in listing can be a "read more" link, in full view it's always "related posts".
+                if ($fullView) {
+                    continue;
+                } else {
+                    if (strpos($paragraphText, 'class="more-link"') !== false) {
+                        continue;
+                    }
+                }
             }
+
+            // First paragraph MAY contain text when stripped off of /a/img or /img, so we should clean it if it's empty.
+            // This is also true for the "view-more" span, which sits alone in its own paragraph
+            $paragraphText = str_replace(array('<p/>', '<p></p>'), '', $paragraphText);
+
             $text .= $paragraphText;
         }
 
@@ -130,15 +147,27 @@ class Talkshoes extends AbstractProvider
             'p',
             'img' => 'src',
             'a' => 'href',
-            'h1', 'h2', 'h3', 'h4', 'h5', 'h6',
+            'h1',
+            'h2',
+            'h3',
+            'h4',
+            'h5',
+            'h6',
             'br',
-            'em', 'strong',
-            'cite', 'blockquote',
+            'em',
+            'strong',
+            'cite',
+            'blockquote',
             'code',
-            'ul', 'ol', 'li',
-            'dl', 'dt', 'dd',
+            'ul',
+            'ol',
+            'li',
+            'dl',
+            'dt',
+            'dd',
         ));
         $text = $tagsFilter->filter($text);
+
         return $text;
     }
 
@@ -163,7 +192,7 @@ class Talkshoes extends AbstractProvider
         foreach ($paragraphs as $i => $paragraphDomNode) {
             /** @var $paragraph \DOMNode */
             $paragraphNode = new Crawler($paragraphDomNode, $url);
-            $article .= $this->filterParagraph($paragraphNode, $i, $paragraphs->count());
+            $article .= $this->filterParagraph($paragraphNode, $i, $paragraphs->count(), true);
         }
         $content->set('article', $article);
     }
