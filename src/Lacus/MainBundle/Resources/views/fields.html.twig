@@ -26,7 +26,9 @@
                     url:'{{ path('admin_lacus_main_mapper_get_fields') }}',
                     type:'POST',
                     data:{
-                        account:$('#{{ form.parent['account'].vars.id }}').val(),
+                        {% if form.parent['defaultAccount'] is defined %}
+                        account:$('#{{ form.parent['defaultAccount'].vars.id }}').val(),
+                        {% endif %}
                         id:$('#{{ form.parent['id'].vars.id }}').val()
                     },
                     beforeSend:function () {
@@ -39,7 +41,7 @@
                         $button.button('reset');
                         if (data.status === 'OK') {
                             $messages.append($('<div class="alert alert-success"><button type="button" class="close" data-dismiss="alert">×</button></div>').append(data.message)).slideDown();
-                            $container.val(data.mapped_data);
+                            $container.val(data.mapper_data);
                         } else {
                             $messages.append($('<div class="alert"><button type="button" class="close" data-dismiss="alert">×</button></div>').append(data.message)).slideDown();
                             $container.val('');

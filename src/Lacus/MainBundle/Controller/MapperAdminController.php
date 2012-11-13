@@ -139,30 +139,44 @@ class MapperAdminController extends CRUDController
             );
         }
 
-        $formData = array(
+        $mapperData = array(
             'fields' => $submitForm->getValues(),
         );
         if ($submitForm->getFiles()) {
-            $formData['files'] = $submitForm->getFiles();
+            $mapperData['files'] = $submitForm->getFiles();
         }
 
-        foreach ($formData['fields'] as $fieldId => $fieldValue) {
-            $formData['fields'][$fieldId] = array(
+        foreach ($mapperData['fields'] as $fieldName => $fieldValue) {
+            $mapperData['fields'][$fieldName] = array(
                 'segment' => array(
-                    'name' => $fieldId,
+                    'name' => $fieldName,
                     'options' => array(),
                 ),
                 'field' => array(),
             );
+            if ($fieldValue) {
+                $mapperData['fields'][$fieldName]['field']['default'] = $fieldValue;
+            }
         }
 
-        $mappedData = Yaml::dump($formData, 4, 2);
+        if (!empty($mapperData['files'])) {
+            foreach ($mapperData['files'] as $fileFieldName => $fileField) {
+                $mapperData['files'][$fileFieldName] = array(
+                    'segment' => array(
+                        'name' => $fileFieldName,
+                        'options' => array(),
+                    ),
+                );
+            }
+        }
+
+        $mapperDataYaml = Yaml::dump($mapperData, 4, 2);
 
         return $this->renderJson(
             array(
                 'status' => "OK",
-                'message' => "Fields successfully fetched.",
-                'mapped_data' => $mappedData,
+                'message' => "Fields successfully fetched. Please ensure that this looks like the correct submit form.",
+                'mapper_data' => $mapperDataYaml,
             )
         );
     }

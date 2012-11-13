@@ -3,8 +3,12 @@
 namespace Lacus\MainBundle\Form\Type;
 
 use Symfony\Component\Form\AbstractType;
+use Lacus\MainBundle\Entity\Mapper;
+use Doctrine\ORM\EntityRepository;
 use Symfony\Component\OptionsResolver\OptionsResolverInterface;
 use Symfony\Component\Form\FormBuilderInterface;
+use Symfony\Component\Form\FormEvents;
+use Symfony\Component\Form\FormEvent;
 
 class MapperConfigureFormType extends AbstractType
 {
@@ -18,24 +22,58 @@ class MapperConfigureFormType extends AbstractType
 
     public function buildForm(FormBuilderInterface $builder, array $options)
     {
-        $builder->add('id', 'hidden', array(
-            'disabled' => true,
-        ));
-        $builder->add('account', 'entity', array(
-            'class'=>'Lacus\MainBundle\Entity\Account',
-            'property'=>'username',
-            'required' => false,
-            'mapped' => false,
-        ));
-        $builder->add('data', 'mapper_data', array(
-            'required' => true,
-        ));
+        $factory = $builder->getFormFactory();
+        $builder->addEventListener(
+            FormEvents::POST_SET_DATA,
+            function (FormEvent $event) use ($factory) {
+                $mapper = $event->getData();
+                if (!$mapper instanceof Mapper) {
+                    return;
+                }
+                if (!$mapper->getLoginRequired()) {
+                    return;
+                }
+                $defaultAccountField = $factory->createNamed(
+                    'defaultAccount',
+                    'entity',
+                    null,
+                    array(
+                        'class' => 'Lacus\MainBundle\Entity\Account',
+                        'property' => 'username',
+                        'query_builder' => function (EntityRepository $er) use ($mapper) {
+                            return $er->createQueryBuilder('a')
+                              ->where('a.site = :site')
+                              ->setParameter('site', $mapper->getSite())
+                              ->orderBy('a.id', 'ASC');
+                        },
+                    )
+                );
+                $event->getForm()->add($defaultAccountField);
+            }
+        );
+
+        $builder->add(
+            'id',
+            'hidden',
+            array(
+                'disabled' => true,
+            )
+        );
+        $builder->add(
+            'data',
+            'mapper_data',
+            array(
+                'required' => true,
+            )
+        );
     }
 
     public function setDefaultOptions(OptionsResolverInterface $resolver)
     {
-        $resolver->setDefaults(array(
-            'data_class' => 'Lacus\MainBundle\Entity\Mapper',
-        ));
+        $resolver->setDefaults(
+            array(
+                'data_class' => 'Lacus\MainBundle\Entity\Mapper',
+            )
+        );
     }
 }

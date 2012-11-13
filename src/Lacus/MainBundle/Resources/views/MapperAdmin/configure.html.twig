@@ -5,14 +5,17 @@
         Available segments:
         <ul>
             {% for field in content_template %}
-            <li>{{ field.name }}</li>
+                <li>{{ field.name }}</li>
             {% endfor %}
         </ul>
     </div>
 
     {% set render_fieldset = true %}
     <form class="form-horizontal" {{ form_enctype(form) }} action="{{ path('admin_lacus_main_mapper_configure',{'id':object.id}) }}" method="post">
-        {{ form_row(form.account) }}
+        {% if form.defaultAccount is defined %}
+            {{ form_row(form.defaultAccount) }}
+        {% endif %}
+
         {{ form_row(form.data) }}
 
         {{ form_rest(form) }}

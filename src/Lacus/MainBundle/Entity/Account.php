@@ -48,7 +48,7 @@ class Account
      * @var Site
      *
      * @ORM\ManyToOne(targetEntity="Site", inversedBy="accounts")
-     * @ORM\JoinColumn(name="site", referencedColumnName="id")
+     * @ORM\JoinColumn(name="site", referencedColumnName="id", nullable=false)
      */
     private $site;
 

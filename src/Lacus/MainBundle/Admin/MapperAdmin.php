@@ -90,14 +90,6 @@ class MapperAdmin extends Admin
                 'required' => false,
             )
         )
-          ->add(
-            'defaultAccount',
-            null,
-            array(
-                'required' => false,
-                'property' => 'username',
-            )
-        )
           ->add('submitUrl')
           ->add('submitButton')
           ->end();
