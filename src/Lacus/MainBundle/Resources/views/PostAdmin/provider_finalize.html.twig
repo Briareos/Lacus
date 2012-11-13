@@ -9,7 +9,7 @@
                 <ul class="nav">
                     <li class="active"><a href="#tab-info" data-toggle="tab">Content</a></li>
                     <li><a href="#tab-files" data-toggle="tab">Files</a></li>
-                    <li><a href="#tab-status" data-toggle="tab">Posting options</a></li>
+                    <li><a href="#tab-options" data-toggle="tab">Posting options</a></li>
                 </ul>
             </div>
         </div>
@@ -26,8 +26,13 @@
                         No files
                     {% endif %}
                 </div>
-                <div class="tab-pane" id="tab-status">
-                    {{ form_row(form.status) }}
+                <div class="tab-pane" id="tab-options">
+                    {% if form.status is defined %}
+                        {{ form_row(form.status) }}
+                    {% endif %}
+                    {% if form.account is defined %}
+                    {{ form_row(form.account) }}
+                    {% endif %}
                 </div>
             </div>
         </div>

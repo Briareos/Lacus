@@ -16,6 +16,9 @@
         <one-to-many target-entity="Lacus\MainBundle\Entity\Post" mapped-by="user" field="posts">
         </one-to-many>
 
+        <one-to-many target-entity="Lacus\MainBundle\Entity\Log" mapped-by="user" field="logs">
+        </one-to-many>
+
     </entity>
 
 </doctrine-mapping>

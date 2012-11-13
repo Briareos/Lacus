@@ -29,6 +29,8 @@ class Post
 
     const STATUS_ARCHIVE = 'archive';
 
+    const STATUS_FAILURE = 'failure';
+
     /**
      * @var integer $id
      *
@@ -106,7 +108,7 @@ class Post
     /**
      * @var ArrayCollection
      *
-     * @ORM\OneToMany(targetEntity="Log", mappedBy="post", cascade={"persist"})
+     * @ORM\OneToMany(targetEntity="Log", mappedBy="post")
      */
     private $logs;
 
@@ -237,6 +239,7 @@ class Post
             /** @var $file File */
             $files[$file->getFieldName()] = $file;
         }
+
         return $files;
     }
 
@@ -362,6 +365,7 @@ class Post
         foreach ($this->content as $contentField => $contentValue) {
             $contentFields[$this->getRawFieldName($contentField)] = $contentValue;
         }
+
         return $contentFields;
     }
 
@@ -372,6 +376,8 @@ class Post
             /** @var $file File */
             $fileFields[$this->getRawFieldName($file->getFieldName())] = $file;
         }
+
         return $fileFields;
     }
+
 }

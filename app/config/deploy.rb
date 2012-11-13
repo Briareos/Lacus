@@ -22,7 +22,7 @@ set  :keep_releases,  3
 
 #logger.level = Logger::MAX_LEVEL
 
-set :shared_files,      ["app/config/parameters.yml"]
+set :shared_files,      ["app/config/parameters.yml", "web/app_dev.php"]
 set :shared_children,   [app_path + "/logs", web_path + "/uploads", "vendor"]
 set :use_composer, true
 
@@ -42,14 +42,14 @@ task :make_cache_writable do
 end
 
 task :make_uploads_writable do
-  try_sudo "setfacl -R -m u:#{server_user}:rwx -m u:#{user}:rwx shared/app/logs"
-  try_sudo "setfacl -dR -m u:#{server_user}:rwx -m u:#{user}:rwx shared/app/logs"
+  try_sudo "setfacl -R -m u:#{server_user}:rwx -m u:#{user}:rwx #{deploy_to}/shared/app/logs"
+  try_sudo "setfacl -dR -m u:#{server_user}:rwx -m u:#{user}:rwx #{deploy_to}/shared/app/logs"
 end
 
 task :make_uploads_writable do
   current_path = deploy_to + "/current"
-  try_sudo "setfacl -R -m u:#{server_user}:rwx -m u:#{user}:rwx shared/web/uploads"
-  try_sudo "setfacl -dR -m u:#{server_user}:rwx -m u:#{user}:rwx shared/web/uploads"
+  try_sudo "setfacl -R -m u:#{server_user}:rwx -m u:#{user}:rwx #{deploy_to}/shared/web/uploads"
+  try_sudo "setfacl -dR -m u:#{server_user}:rwx -m u:#{user}:rwx #{deploy_to}/shared/web/uploads"
 end
 
 after "deploy:setup", "upload_parameters"

@@ -29,14 +29,19 @@ class User extends BaseUser
     protected $id;
 
     /**
-     * @var ArrayCollection
+     * @var \Lacus\MainBundle\Entity\Site[]
      */
     protected $sites;
 
     /**
-     * @var ArrayCollection
+     * @var \Lacus\MainBundle\Entity\Post[]
      */
     protected $posts;
+
+    /**
+     * @var \Lacus\MainBundle\Entity\Log[]
+     */
+    protected $logs;
 
 
     public function __construct()
@@ -44,6 +49,7 @@ class User extends BaseUser
         parent::__construct();
         $this->sites = new ArrayCollection();
         $this->posts = new ArrayCollection();
+        $this->logs = new ArrayCollection();
     }
 
     /**
@@ -70,5 +76,15 @@ class User extends BaseUser
     public function setSites($sites)
     {
         $this->sites = $sites;
+    }
+
+    public function getLogs()
+    {
+        return $this->logs;
+    }
+
+    public function setLogs($logs)
+    {
+        $this->logs = $logs;
     }
 }

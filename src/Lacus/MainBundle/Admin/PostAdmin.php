@@ -3,6 +3,7 @@
 namespace Lacus\MainBundle\Admin;
 
 use Sonata\AdminBundle\Admin\Admin;
+use Symfony\Component\Security\Core\SecurityContextInterface;
 use Sonata\AdminBundle\Datagrid\DatagridMapper;
 use Lacus\MainBundle\Entity\Post;
 use Lacus\MainBundle\Form\Event\GeneratePostForm;
@@ -28,9 +29,19 @@ class PostAdmin extends Admin
      */
     private $providerPool;
 
+    /**
+     * @var SecurityContextInterface
+     */
+    protected $securityContext;
+
     public function setProviderPool(ProviderPool $providerPool)
     {
         $this->providerPool = $providerPool;
+    }
+
+    public function setSecurityContext(SecurityContextInterface $securityContext)
+    {
+        $this->securityContext = $securityContext;
     }
 
     protected function configureRoutes(RouteCollection $collection)
@@ -96,12 +107,22 @@ class PostAdmin extends Admin
                 '_controller' => 'MainBundle:PostAdmin:check',
             )
         );
+        $collection->add(
+            'set_status',
+            '{post}/status/{status}/{token}',
+            array(
+                '_controller' => 'MainBundle:PostAdmin:setStatus',
+            ),
+            array(
+                'status' => '(' . implode('|', array(Post::STATUS_DRAFT, Post::STATUS_REVIEW, Post::STATUS_QUEUE, Post::STATUS_PUBLISH, Post::STATUS_ARCHIVE, Post::STATUS_FAILURE)) . ')',
+            )
+        );
     }
 
     public function getFormBuilder()
     {
         $formBuilder = parent::getFormBuilder();
-        $formBuilder->addEventSubscriber(new GeneratePostForm($formBuilder->getFormFactory(), $this->getContentTemplate()));
+        $formBuilder->addEventSubscriber(new GeneratePostForm($formBuilder->getFormFactory(), $this->getContentTemplate(), $this));
 
         return $formBuilder;
     }
@@ -202,6 +223,20 @@ class PostAdmin extends Admin
         if ($name === 'CREATE') {
             return false;
         }
+        if ($name === 'PUBLISH') {
+            if (parent::isGranted('PUBLISH', $object)) {
+                return true;
+            }
+            if ($object === null) {
+                return false;
+            }
+            /** @var $object Post */
+            if ($this->userOwnsPost($object)) {
+                return parent::isGranted('PUBLISH_OWN', $object);
+            } else {
+                return false;
+            }
+        }
 
         return parent::isGranted($name, $object);
     }
@@ -226,6 +261,9 @@ class PostAdmin extends Admin
             $securityInformation[sprintf('PROVIDER_%s', strtoupper($providerAlias))] = array();
         }
 
+        $securityInformation['PUBLISH'] = array();
+        $securityInformation['PUBLISH_OWN'] = array();
+
         return parent::getSecurityInformation() + $securityInformation;
     }
 
@@ -234,4 +272,60 @@ class PostAdmin extends Admin
         return $this->isGranted(sprintf('PROVIDER_%s', strtoupper($provider)));
     }
 
+    private function userOwnsPost(Post $post)
+    {
+        $user = $this->getUser();
+
+        if ($user === null) {
+            return false;
+        }
+
+        $owners = $post->getMapper()->getSite()->getUsers();
+        foreach ($owners as $owner) {
+            if ($owner->getId() === $user->getId()) {
+                return true;
+            }
+        }
+
+        return false;
+    }
+
+    public function getUser()
+    {
+        if (null === $token = $this->securityContext->getToken()) {
+            return null;
+        }
+
+        if (!is_object($user = $token->getUser())) {
+            return null;
+        }
+
+        return $user;
+    }
+
+    public function canSetStatus(Post $post, $status)
+    {
+        $currentStatus = $post->getStatus();
+
+        $publishStatuses = array(Post::STATUS_QUEUE, Post::STATUS_PUBLISH);
+        $automatedStatuses = array(Post::STATUS_ARCHIVE, Post::STATUS_FAILURE);
+
+        if($currentStatus === $status) {
+            return true;
+        }
+
+        if (!$post->getId() && in_array($status, $automatedStatuses)) {
+            return false;
+        }
+
+        if ($currentStatus === Post::STATUS_PUBLISH && !in_array($status, $automatedStatuses)) {
+            return false;
+        }
+
+        if (in_array($status, $publishStatuses) || in_array($status, $automatedStatuses) || in_array($currentStatus, $publishStatuses) || in_array($currentStatus, $automatedStatuses)) {
+            return $this->isGranted('PUBLISH', $post);
+        }
+
+        return $this->isGranted('EDIT', $post);
+    }
 }

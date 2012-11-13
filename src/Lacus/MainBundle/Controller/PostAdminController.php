@@ -3,6 +3,7 @@
 namespace Lacus\MainBundle\Controller;
 
 use Sonata\AdminBundle\Controller\CRUDController;
+use Symfony\Component\HttpKernel\Exception\HttpException;
 use Symfony\Component\Security\Core\Exception\AccessDeniedException;
 use Lacus\MainBundle\Content\Exception\ValidationException;
 use Lacus\MainBundle\Content\ContentCollection;
@@ -16,6 +17,13 @@ use JMS\DiExtraBundle\Annotation as DI;
 
 class PostAdminController extends CRUDController
 {
+    /**
+     * @DI\Inject("form.csrf_provider")
+     *
+     * @var \Symfony\Component\Form\Extension\Csrf\CsrfProvider\CsrfProviderInterface
+     */
+    private $csrfProvider;
+
     /**
      * @var \Symfony\Component\Form\FormFactoryInterface
      *
@@ -37,13 +45,24 @@ class PostAdminController extends CRUDController
      */
     private $providerPool;
 
+    /**
+     * @DI\Inject("doctrine.orm.default_entity_manager")
+     *
+     * @var \Doctrine\ORM\EntityManager
+     */
+    private $em;
+
+    /**
+     * @var \Lacus\MainBundle\Admin\PostAdmin
+     */
+    protected $admin;
+
     public function providerListAction()
     {
-        /** @var $admin \Lacus\MainBundle\Admin\PostAdmin */
-        $admin = $this->admin;
-        if(!$admin->hasAccessToAnyProvider()) {
+        if (!$this->admin->hasAccessToAnyProvider()) {
             throw new AccessDeniedException();
         }
+
         return $this->render(
             'MainBundle:PostAdmin:provider_list.html.twig',
             array(
@@ -55,9 +74,7 @@ class PostAdminController extends CRUDController
 
     public function providerAction($provider)
     {
-        /** @var $admin \Lacus\MainBundle\Admin\PostAdmin */
-        $admin = $this->admin;
-        if(!$admin->hasAccessToProvider($provider)) {
+        if (!$this->admin->hasAccessToProvider($provider)) {
             throw new AccessDeniedException();
         }
         $activeProvider = $this->providerPool->getProvider($provider);
@@ -97,12 +114,9 @@ class PostAdminController extends CRUDController
 
     public function providerFinalizeAction($provider, $mapperId)
     {
-        /** @var $admin \Lacus\MainBundle\Admin\PostAdmin */
-        $admin = $this->admin;
-        if(!$admin->hasAccessToProvider($provider)) {
+        if (!$this->admin->hasAccessToProvider($provider)) {
             throw new AccessDeniedException();
         }
-        /** @var $serializer \JMS\SerializerBundle\Serializer\Serializer */
         $contentSerialized = $this->getRequest()->request->get('content');
         $content = Content::getUnserialized($contentSerialized);
 
@@ -165,7 +179,7 @@ class PostAdminController extends CRUDController
         if (!$form->isValid()) {
             return $this->renderJson(
                 array(
-                    'status' => 'invalid',
+                    'status' => "KO",
                     'form' => $this->renderView(
                         'MainBundle:PostAdmin:provider_finalize.html.twig',
                         array(
@@ -181,7 +195,7 @@ class PostAdminController extends CRUDController
 
             return $this->renderJson(
                 array(
-                    'status' => 'success',
+                    'status' => "OK",
                 )
             );
         }
@@ -207,9 +221,8 @@ class PostAdminController extends CRUDController
 
     public function getAvailableSites()
     {
-        $em = $this->getDoctrine()->getManager();
         /** @var $siteRepository \Lacus\MainBundle\Entity\SiteRepository */
-        $siteRepository = $sites = $em->getRepository('MainBundle:Site');
+        $siteRepository = $sites = $this->em->getRepository('MainBundle:Site');
         $sites = $siteRepository->findAll();
 
         return $sites;
@@ -234,7 +247,7 @@ class PostAdminController extends CRUDController
     protected function getContentForm(Post $post, Content $content)
     {
         $formBuilder = $this->formFactory->createNamedBuilder('finalize_form', 'form', $post);
-        $formBuilder->addEventSubscriber(new GeneratePostForm($formBuilder->getFormFactory(), $content));
+        $formBuilder->addEventSubscriber(new GeneratePostForm($formBuilder->getFormFactory(), $content, $this->admin));
         $formBuilder->add(
             '_content',
             'hidden',
@@ -249,9 +262,7 @@ class PostAdminController extends CRUDController
 
     public function queueAction()
     {
-        /** @var $em \Doctrine\ORM\EntityManager */
-        $em = $this->getDoctrine()->getManager();
-        $query = $em->createQuery('Select p From MainBundle:Post p Order By p.createdAt Desc');
+        $query = $this->em->createQuery('Select p From MainBundle:Post p Order By p.createdAt Desc');
 
         $page = $this->getRequest()->query->getInt('page');
         if ($page === 0) {
@@ -292,4 +303,44 @@ class PostAdminController extends CRUDController
     {
 
     }
+
+    public function setStatusAction($post, $status, $token)
+    {
+        /** @var $post Post */
+        $post = $this->em->find('MainBundle:Post', $post);
+        if ($post === null) {
+            throw $this->createNotFoundException('Post not found.');
+        }
+
+        if (!$this->getRequest()->isXmlHttpRequest()) {
+            throw new HttpException(400, 'This method must be accessed through ajax.');
+        }
+
+        if ($status === $post->getStatus()
+          || !$this->admin->canSetStatus($post, $status)
+          || !$this->csrfProvider->isCsrfTokenValid('set-status', $token)
+        ) {
+            // Just ignore this request.
+            return $this->renderJson(array());
+        }
+
+        $post->setStatus($status);
+        $this->em->persist($post);
+        $this->em->flush();
+
+        return $this->renderJson(
+            array(
+                'status' => "OK",
+                'statuses' => $this->renderView(
+                    'MainBundle:PostAdmin:statuses.html.twig',
+                    array(
+                        'post' => $post,
+                        'admin' => $this->admin,
+                    )
+                ),
+            )
+        );
+    }
+
+
 }

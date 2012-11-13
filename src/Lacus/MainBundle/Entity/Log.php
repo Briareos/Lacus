@@ -3,6 +3,7 @@
 namespace Lacus\MainBundle\Entity;
 
 use Doctrine\ORM\Mapping as ORM;
+use Application\Sonata\UserBundle\Entity\User;
 
 /**
  * Lacus\MainBundle\Entity\Log
@@ -43,7 +44,13 @@ class Log
      */
     private $post;
 
-    private $oldStatus;
+    /**
+     * @var \Application\Sonata\UserBundle\Entity\User
+     *
+     * @ORM\ManyToOne(targetEntity="Application\Sonata\UserBundle\Entity\User", inversedBy="logs")
+     * @ORM\JoinColumn(name="user", referencedColumnName="id", onDelete="CASCADE")
+     */
+    private $user;
 
     private $status;
 
@@ -56,7 +63,7 @@ class Log
     /**
      * Get id
      *
-     * @return integer 
+     * @return integer
      */
     public function getId()
     {
@@ -72,14 +79,14 @@ class Log
     public function setCreatedAt($createdAt)
     {
         $this->createdAt = $createdAt;
-    
+
         return $this;
     }
 
     /**
      * Get createdAt
      *
-     * @return \DateTime 
+     * @return \DateTime
      */
     public function getCreatedAt()
     {
@@ -95,14 +102,14 @@ class Log
     public function setResponse($response)
     {
         $this->response = $response;
-    
+
         return $this;
     }
 
     /**
      * Get response
      *
-     * @return string 
+     * @return string
      */
     public function getResponse()
     {
@@ -133,5 +140,21 @@ class Log
     public function setStatus($status)
     {
         $this->status = $status;
+    }
+
+    /**
+     * @return User
+     */
+    public function getUser()
+    {
+        return $this->user;
+    }
+
+    /**
+     * @param User $user
+     */
+    public function setUser(User $user = null)
+    {
+        $this->user = $user;
     }
 }

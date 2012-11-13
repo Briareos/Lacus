@@ -286,6 +286,9 @@ class Site
         $this->active = $active;
     }
 
+    /**
+     * @return \Application\Sonata\UserBundle\Entity\User[]
+     */
     public function getUsers()
     {
         return $this->users;

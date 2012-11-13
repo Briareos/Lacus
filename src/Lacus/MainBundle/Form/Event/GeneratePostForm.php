@@ -3,7 +3,8 @@
 namespace Lacus\MainBundle\Form\Event;
 
 use Symfony\Component\EventDispatcher\EventSubscriberInterface;
-use Lacus\MainBundle\Post\PostManager;
+use Doctrine\ORM\EntityRepository;
+use Lacus\MainBundle\Admin\PostAdmin;
 use Lacus\MainBundle\Mapper\MapperDataTree;
 use Lacus\MainBundle\Entity\Post;
 use Lacus\MainBundle\Content\Content;
@@ -18,10 +19,13 @@ class GeneratePostForm implements EventSubscriberInterface
 
     private $content;
 
-    public function __construct(FormFactoryInterface $factory, Content $content)
+    private $postAdmin;
+
+    public function __construct(FormFactoryInterface $factory, Content $content, PostAdmin $postAdmin)
     {
         $this->factory = $factory;
         $this->content = $content;
+        $this->postAdmin = $postAdmin;
     }
 
     /**
@@ -38,34 +42,46 @@ class GeneratePostForm implements EventSubscriberInterface
     {
         if ($event->getData()) {
             $this->addFields($event);
-            $this->disablePublishOption($event);
+            $this->addStatusField($event);
+            $this->addAccountField($event);
         }
     }
 
-    public function disablePublishOption(FormEvent $event)
+    public function addStatusField(FormEvent $event)
     {
         /** @var $post Post */
         $post = $event->getData();
         $form = $event->getForm();
 
-        $form->add(
-            $this->factory->createNamed(
-                'status',
-                'choice',
-                null,
-                array(
-                    'expanded' => true,
-                    'choices' => array(
-                        Post::STATUS_DRAFT => Post::STATUS_DRAFT,
-                        Post::STATUS_REVIEW => Post::STATUS_REVIEW,
-                        Post::STATUS_QUEUE => Post::STATUS_QUEUE,
-                        Post::STATUS_PUBLISH => Post::STATUS_PUBLISH,
-                    ),
-                    'read_only' => ($post->getStatus() === Post::STATUS_PUBLISH),
-                    'disabled' => ($post->getStatus() === Post::STATUS_PUBLISH),
+        $statuses = array();
+
+        foreach (array(Post::STATUS_DRAFT, Post::STATUS_REVIEW, Post::STATUS_QUEUE, Post::STATUS_PUBLISH, Post::STATUS_ARCHIVE, Post::STATUS_FAILURE) as $status) {
+            if ($this->postAdmin->canSetStatus($post, $status)) {
+                $statuses[$status] = $status;
+            }
+        }
+
+
+        if ($statuses) {
+            $selectedStatus = end($statuses);
+            if ($post->getStatus() !== Post::STATUS_TEMPORARY) {
+                $selectedStatus = $post->getStatus();
+            }
+            $form->add(
+                $this->factory->createNamed(
+                    'status',
+                    'choice',
+                    null,
+                    array(
+                        'expanded' => true,
+                        'choices' => $statuses,
+                        'data' => $selectedStatus,
+                        'read_only' => ($post->getStatus() === Post::STATUS_PUBLISH),
+                        'disabled' => ($post->getStatus() === Post::STATUS_PUBLISH),
+                    )
                 )
-            )
-        );
+            );
+        }
     }
 
     public function addFields(FormEvent $event)
@@ -178,5 +194,33 @@ class GeneratePostForm implements EventSubscriberInterface
         } else {
             throw new \RuntimeException('No field.value, field.default or segment.name options provided.');
         }
+    }
+
+    private function addAccountField(FormEvent $event)
+    {
+        $post = $event->getData();
+        if (!$post instanceof Post) {
+            return;
+        }
+        $mapper = $post->getMapper();
+        if (!$mapper->getLoginRequired()) {
+            return;
+        }
+        $account = $this->factory->createNamed(
+            'account',
+            'entity',
+            null,
+            array(
+                'class' => 'Lacus\MainBundle\Entity\Account',
+                'property' => 'username',
+                'query_builder' => function (EntityRepository $er) use ($mapper) {
+                    return $er->createQueryBuilder('a')
+                      ->where('a.site = :site')
+                      ->setParameter('site', $mapper->getSite())
+                      ->orderBy('a.id', 'ASC');
+                },
+            )
+        );
+        $event->getForm()->add($account);
     }
 }

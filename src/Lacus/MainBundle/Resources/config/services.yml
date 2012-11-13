@@ -21,6 +21,7 @@ services:
             - { name: sonata.admin, manager_type: orm, group: main_post, label: posts }
         calls:
             - [ setProviderPool, [ @lacus.content_provider.pool ] ]
+            - [ setSecurityContext, [ @security.context ] ]
     sonata.main.admin.mapper:
         class: Lacus\MainBundle\Admin\MapperAdmin
         arguments: [null, Lacus\MainBundle\Entity\Mapper, MainBundle:MapperAdmin]
@@ -39,10 +40,11 @@ services:
         arguments: [ @lacus.post.poster, @doctrine.orm.default_entity_manager ]
     lacus.post.watcher:
         class: Lacus\MainBundle\Listener\PostWatcher
-        arguments: [ @old_sound_rabbit_mq.post_poster_producer ]
+        arguments: [ @old_sound_rabbit_mq.post_poster_producer, @service_container ]
         tags:
             - { name: doctrine.event_listener, event: postPersist }
             - { name: doctrine.event_listener, event: preUpdate }
+            - { name: doctrine.event_listener, event: postUpdate }
     lacus.file.listener:
         class: Lacus\MainBundle\Listener\FileListener
         tags:
