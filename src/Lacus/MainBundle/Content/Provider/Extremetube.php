@@ -154,10 +154,12 @@ class Extremetube extends AbstractProvider
         }
 
         if ($this->getSearch()) {
-            $url = 'http://www.extremetube.com/videos';
+            $url .= 'videos';
             $query['search'] = $this->getSearch();
         } elseif ($this->getCategory()) {
-            $url = 'http://www.extremetube.com/category/' . $this->getCategory()->getId();
+            $url .= 'category/' . $this->getCategory()->getId();
+        } else {
+            $url .= 'videos';
         }
 
         if ($this->getSort()) {
