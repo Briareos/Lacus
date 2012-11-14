@@ -29,8 +29,10 @@
                     </a>
                     <ul class="dropdown-menu">
                         {% for provider_name in providers %}
-                            <li class="{{ current_provider == provider_name ? 'active' : '' }}"><a
-                                    href="{{ path('admin_lacus_main_post_provider',{'provider':provider_name}) }}">{{ provider_name|capitalize }}</a>
+                            <li class="{{ current_provider == provider_name ? 'active' : '' }}">
+                                {% if admin.hasAccessToProvider(provider_name) %}
+                                    <a href="{{ path('admin_lacus_main_post_provider',{'provider':provider_name}) }}">{{ provider_name|capitalize }}</a>
+                                {% endif %}
                             </li>
                         {% endfor %}
                     </ul>
@@ -193,7 +195,7 @@
                             </a>
                             <ul class="dropdown-menu" data-content="{{ content.uuid }}" data-serialized="{{ content.serialized }}">
                                 {% if sites|length %}
-                                    {% for site in sites %}
+                                    {% for site in sites if (site.getMappersFor(current_provider)|length or admin.getConfigurationPool().getAdminByAdminCode('sonata.main.admin.mapper').isGranted('CREATE')) %}
                                         {% if loop.index > 1 %}
                                             <li class="divider"></li>
                                         {% endif %}
@@ -211,9 +213,11 @@
                                                 </li>
                                             {% endfor %}
                                         {% endif %}
-                                        <li>
-                                            <a href="{{ path('admin_lacus_main_mapper_create',{'siteId':site.id,'provider':current_provider}) }}"><i class="icon-plus"></i> Create a new mapper</a>
-                                        </li>
+                                        {% if admin.getConfigurationPool().getAdminByAdminCode('sonata.main.admin.mapper').isGranted('CREATE') %}
+                                            <li>
+                                                <a href="{{ path('admin_lacus_main_mapper_create',{'siteId':site.id,'provider':current_provider}) }}"><i class="icon-plus"></i> Create a new mapper</a>
+                                            </li>
+                                        {% endif %}
                                     {% endfor %}
                                 {% else %}
                                     <li><a href="{{ path('admin_lacus_main_site_create') }}"><i class="icon-warning-sign"></i> No sites configured, click here to create a new one</a></li>

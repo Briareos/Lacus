@@ -20,13 +20,20 @@ class MapperFileType extends AbstractType
 
     public function setDefaultOptions(OptionsResolverInterface $resolver)
     {
-        $resolver->setDefaults(array(
-            'data_class' => 'Lacus\MainBundle\Entity\File',
-        ));
+        $resolver->setDefaults(
+            array(
+                'data_class' => 'Lacus\MainBundle\Entity\File',
+                'file_type' => 'file',
+                'show_alternatives' => false,
+                'alternatives' => array(),
+            )
+        );
     }
 
     public function buildView(FormView $view, FormInterface $form, array $options)
     {
+        $view->vars['alternatives'] = ($options['show_alternatives'] && count($options['alternatives']) ? $options['alternatives'] : array());
+        $view->vars['file_type'] = $options['file_type'];
     }
 
     public function buildForm(FormBuilderInterface $builder, array $options)
@@ -34,4 +41,5 @@ class MapperFileType extends AbstractType
         $builder->add('remotePath', 'url');
         $builder->add('file', 'file');
     }
+
 }

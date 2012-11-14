@@ -8,7 +8,6 @@
             <div class="navbar-inner">
                 <ul class="nav">
                     <li class="active"><a href="#tab-info" data-toggle="tab">Content</a></li>
-                    <li><a href="#tab-files" data-toggle="tab">Files</a></li>
                     <li><a href="#tab-options" data-toggle="tab">Posting options</a></li>
                 </ul>
             </div>
@@ -19,11 +18,10 @@
                     {% for content_field in form.content %}
                         {{ form_row(content_field,{'attr':{'class':'input-block-level' }}) }}
                     {% endfor %}
-                </div>
-                <div class="tab-pane" id="tab-files">
-                    {{ form_row(form.post_files) }}
-                    {% if form.post_files|length == 0 %}
-                        No files
+                    {% if form.post_files|length %}
+                        {% for post_file in form.post_files %}
+                            {{ form_row(post_file) }}
+                        {% endfor %}
                     {% endif %}
                 </div>
                 <div class="tab-pane" id="tab-options">
@@ -31,7 +29,7 @@
                         {{ form_row(form.status) }}
                     {% endif %}
                     {% if form.account is defined %}
-                    {{ form_row(form.account) }}
+                        {{ form_row(form.account) }}
                     {% endif %}
                 </div>
             </div>

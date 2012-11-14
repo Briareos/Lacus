@@ -204,7 +204,7 @@ class PostAdminController extends CRUDController
     public function getPost(Mapper $mapper, Content $content)
     {
         /** @var $postRepository \Lacus\MainBundle\Entity\PostRepository */
-        $postRepository = $this->getDoctrine()->getRepository('MainBundle:Post');
+        $postRepository = $this->em->getRepository('MainBundle:Post');
         $post = $postRepository->findOneBy(array('uuid' => $content->getUuid(), 'mapper' => $mapper));
         if ($post === null) {
             $post = new Post($mapper);

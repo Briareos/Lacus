@@ -1,11 +1,54 @@
 {% extends 'form_div_layout.html.twig' %}
 
+{% import _self as macros %}
+
+{% block alternative_images %}
+    <script>
+        $(function () {
+            $(document).on('blur', '#{{ id }}:input,#{{ id }}_remotePath:input', function () {
+                $('#{{ id }}-img').attr('src', $(this).val());
+            });
+            $(document).on('click', '#{{ id }}-alt a', function () {
+                $('#{{ id }}:input,#{{ id }}_remotePath:input').val($('img', this).attr('src')).trigger('blur');
+                return false;
+            });
+        })
+    </script>
+
+    {% if alternatives|length %}
+        <div class="btn-group pull-right">
+            <a class="btn dropdown-toggle" data-toggle="dropdown" href="#">
+                Alternative images
+                <span class="caret"></span>
+            </a>
+            <ul id="{{ id }}-alt" class="dropdown-menu">
+                {% for alternative in alternatives %}
+                    <li><a href="#"><img src="{{ alternative }}"/></a></li>
+                {% endfor %}
+            </ul>
+        </div>
+    {% endif %}
+{% endblock %}
+
+{% block show_image %}
+    {% if image_src is not empty %}
+        <img class="img-polaroid" id="{{ id }}-img" src="{{ image_src }}"/>
+    {% endif %}
+{% endblock %}
+
 {% block mapper_file_widget %}
     <fieldset>
+        {% if file_type == 'image' %}
+            {% set image_src = form.vars.value.getRemotePath() %}
+            {{ block('show_image') }}
+            {{ block('alternative_images') }}
+        {% endif %}
         {{ form_widget(form) }}
         {% if form.vars.value and form.vars.value.getWebPath() is not null %}
             <div class="controls">
-                <i class="icon-file"></i> <a href="{{ asset(form.vars.value.getWebPath()) }}">{{ form.vars.value.getFileName() }}</a>
+                <p>
+                    <i class="icon-file"></i> <a href="{{ asset(form.vars.value.getWebPath()) }}">{{ form.vars.value.getFileName() }}</a>
+                </p>
             </div>
         {% endif %}
     </fieldset>
@@ -104,36 +147,10 @@
 {% endblock form_errors %}
 
 {% block mapper_image_widget %}
-    <script>
-        $(function () {
-            $(document).on('blur', '#{{ id }}', function () {
-                $('#{{ id }}-img').attr('src', $(this).val());
-            });
-            $(document).on('click', '#{{ id }}-alt a', function () {
-                $('#{{ id }}').val($('img', this).attr('src')).trigger('blur');
-                return false;
-            });
-        })
-    </script>
-
     {{ form_widget(form) }}
-
-    {% if alternatives|length %}
-        <div class="btn-group pull-right">
-            <a class="btn dropdown-toggle" data-toggle="dropdown" href="#">
-                Alternative images
-                <span class="caret"></span>
-            </a>
-            <ul id="{{ id }}-alt" class="dropdown-menu">
-                {% for alternative in alternatives %}
-                    <li><a href="#"><img src="{{ alternative }}"/></a></li>
-                {% endfor %}
-            </ul>
-        </div>
-    {% endif %}
-
-    <img class="img-polaroid" id="{{ id }}-img" src="{{ form.vars.value }}"/>
-
+    {% set image_src = form.vars.value %}
+    {{ block('show_image') }}
+    {{ block('alternative_images') }}
 {% endblock %}
 
 {% block choice_widget_expanded %}

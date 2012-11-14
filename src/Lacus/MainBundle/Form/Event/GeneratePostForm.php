@@ -76,8 +76,6 @@ class GeneratePostForm implements EventSubscriberInterface
                         'expanded' => true,
                         'choices' => $statuses,
                         'data' => $selectedStatus,
-                        'read_only' => ($post->getStatus() === Post::STATUS_PUBLISH),
-                        'disabled' => ($post->getStatus() === Post::STATUS_PUBLISH),
                     )
                 )
             );
@@ -117,15 +115,24 @@ class GeneratePostForm implements EventSubscriberInterface
 
     public function createFileField($name, $options, $segment, $readOnly = false)
     {
+        /** @var $contentField \Lacus\MainBundle\Content\Segment\File */
+        $contentField = $this->content->getField($segment['name']);
+        $fieldOptions = array(
+            'required' => false,
+            'read_only' => $readOnly,
+            'disabled' => $readOnly,
+            'file_type' => $contentField->getType(),
+            'by_reference' => false,
+        );
+        if ($options['show_alternatives'] && $contentField->hasAlternatives()) {
+            $fieldOptions['show_alternatives'] = true;
+            $fieldOptions['alternatives'] = $contentField->getAlternatives();
+        }
         $field = $this->factory->createNamed(
             $name,
             'mapper_file',
             null,
-            array(
-                'required' => false,
-                'read_only' => $readOnly,
-                'disabled' => $readOnly,
-            )
+            $fieldOptions
         );
 
         return $field;
@@ -219,6 +226,7 @@ class GeneratePostForm implements EventSubscriberInterface
                       ->setParameter('site', $mapper->getSite())
                       ->orderBy('a.id', 'ASC');
                 },
+                'disabled' => ($post->getStatus() === Post::STATUS_PUBLISH),
             )
         );
         $event->getForm()->add($account);

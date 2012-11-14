@@ -67,6 +67,7 @@ class MapperDataTree
                                 ->addDefaultsIfNotSet()
                                 ->children()
                                     ->booleanNode('multiple')->defaultFalse()->end()
+                                    ->booleanNode('show_alternatives')->defaultFalse()->end()
                                 ->end()
                             ->end()
                         ->end()
