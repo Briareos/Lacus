@@ -17,9 +17,9 @@ class Extremetube extends AbstractProvider
     public function populateSortable(SortableFieldContainer $sortable)
     {
         $sortable
-            ->add(new SortableField('viewed', 'mv', array(new SortableField('today', 't'), new SortableField('yesterday', 'y'), new SortableField('week', 'w'), new SortableField('month', 'm'), new SortableField('all', 'a'))))
-            ->add(new SortableField('rated', 'tr', array(new SortableField('today', 't'), new SortableField('yesterday', 'y'), new SortableField('week', 'w'), new SortableField('month', 'm'), new SortableField('all', 'a'))))
-            ->add(new SortableField('longest', 'lg'));
+          ->add(new SortableField('viewed', 'mv', array(new SortableField('today', 't'), new SortableField('yesterday', 'y'), new SortableField('week', 'w'), new SortableField('month', 'm'), new SortableField('all', 'a'))))
+          ->add(new SortableField('rated', 'tr', array(new SortableField('today', 't'), new SortableField('yesterday', 'y'), new SortableField('week', 'w'), new SortableField('month', 'm'), new SortableField('all', 'a'))))
+          ->add(new SortableField('longest', 'lg'));
     }
 
     public function populateCategories(CategoryContainer $categories)
@@ -40,26 +40,36 @@ class Extremetube extends AbstractProvider
     public function populateContentTemplate(Content $contentTemplate)
     {
         $contentTemplate
-            ->addField(new Segment\Image('thumbnail', array(
-            'width' => 240,
-            'height' => 180,
-        )))
-            ->addField(new Segment\Title('title', array()))
-            ->addField(new Segment\Url('url', array(
-            'display_on_list' => false,
-        )))
-            ->addField(new Segment\Duration('duration', array()))
-            ->addField(new Segment\ImageCollection('thumbroll', array(
-            'width' => 240,
-            'height' => 180,
-        )))
-            ->addField(new Segment\Embed('embed', array(
-            'display_on_list' => false,
-        )))
-            ->addField(new Segment\Embed('embed_iframe', array(
-            'display_on_list' => false,
-        )))
-            ->setWidth(240);
+          ->addField(
+            new Segment\Image('thumbnail', array(
+                'width' => 240,
+                'height' => 180,
+            ))
+        )
+          ->addField(new Segment\Title('title', array()))
+          ->addField(
+            new Segment\Url('url', array(
+                'display_on_list' => false,
+            ))
+        )
+          ->addField(new Segment\Duration('duration', array()))
+          ->addField(
+            new Segment\ImageCollection('thumbroll', array(
+                'width' => 240,
+                'height' => 180,
+            ))
+        )
+          ->addField(
+            new Segment\Embed('embed', array(
+                'display_on_list' => false,
+            ))
+        )
+          ->addField(
+            new Segment\Embed('embed_iframe', array(
+                'display_on_list' => false,
+            ))
+        )
+          ->setWidth(240);
 
     }
 
@@ -82,7 +92,10 @@ class Extremetube extends AbstractProvider
         $crawler = new Crawler($response->getContent(), $url);
 
         if ($this->getPage() > 1) {
-            $this->setActiveTitle($crawler->filterXPath("//div[@class='text-browse-result text-left bold relative']")->text());
+            $pageTitle = $crawler->filterXPath("//div[@class='text-browse-result text-left bold relative']");
+            if ($pageTitle->count()) {
+                $this->setActiveTitle($pageTitle->text());
+            }
         }
 
         $videoNodes = $crawler->filterXPath("//ul[contains(@class,'section03')][1]/li/div[descendant::h2]");
@@ -111,7 +124,10 @@ class Extremetube extends AbstractProvider
             $contentId = preg_replace('{[^\d]}', '', $videoNode->parents()->attr('id'));
             $content->setId($contentId);
             $embedIframe = sprintf('<iframe src="http://www.extremetube.com/embed/%s" frameborder="0" height="481" width="608" scrolling="no" name="extremetube_embed_video"></iframe>', $embedId);
-            $embed = sprintf('<object type="application/x-shockwave-flash" data="http://cdn1.static.extremetube.phncdn.com/flash/player_embed.swf" width="608" height="481"><param name="movie" value="http://cdn1.static.extremetube.phncdn.com/flash/player_embed.swf" /><param name="bgColor" value="#000000" /><param name="allowfullscreen" value="true" /><param name="allowScriptAccess" value="always" /><param name="FlashVars" value="options=http://www.extremetube.com/embed_player.php?id=%s"/></object>', $contentId);
+            $embed = sprintf(
+                '<object type="application/x-shockwave-flash" data="http://cdn1.static.extremetube.phncdn.com/flash/player_embed.swf" width="608" height="481"><param name="movie" value="http://cdn1.static.extremetube.phncdn.com/flash/player_embed.swf" /><param name="bgColor" value="#000000" /><param name="allowfullscreen" value="true" /><param name="allowScriptAccess" value="always" /><param name="FlashVars" value="options=http://www.extremetube.com/embed_player.php?id=%s"/></object>',
+                $contentId
+            );
             $content->set('embed', $embed);
             $content->set('embed_iframe', $embedIframe);
             $collection->addContent($content);
@@ -124,6 +140,7 @@ class Extremetube extends AbstractProvider
         for ($i = 1; $i <= $thumbrollCount; $i++) {
             $thumbroll[] = str_replace('{index}', $i, $thumbrollPath);
         }
+
         return $thumbroll;
     }
 
@@ -163,6 +180,7 @@ class Extremetube extends AbstractProvider
         if (count($query)) {
             $url .= '?' . http_build_query($query);
         }
+
         return $url;
     }
 
