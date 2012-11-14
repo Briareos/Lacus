@@ -106,19 +106,6 @@ sonata_admin:
         blocks:
             # display a dashboard block
             - { position: left, type: sonata.admin.block.admin_list }
-        groups:
-            user:
-                label: sonata.user.admin.user
-                items:
-                    - sonata.user.admin.user
-                    - sonata.user.admin.group
-            site:
-                label: sonata.main.label.site
-                items:
-                    - sonata.main.admin.site
-                    - sonata.main.admin.account
-                    - sonata.main.admin.mapper
-                    - sonata.main.admin.post
 
 sonata_user:
     admin:
