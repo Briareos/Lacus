@@ -17,135 +17,149 @@ class Spankwire extends AbstractProvider
     public function populateSortable(SortableFieldContainer $sortable)
     {
         $sortable
-            ->add(new SortableField('featured', 'Featured', array(
-            new SortableField('viewed', 'Views', array(
-                new SortableField('today', 'Today'),
-                new SortableField('yesterday', 'Yesterday'),
-                new SortableField('week', 'Week'),
-                new SortableField('month', 'Month'),
-                new SortableField('year', 'Year'),
-                new SortableField('all', 'All_Time'),
-            )),
-            new SortableField('rated', 'Rating', array(
-                new SortableField('today', 'Today'),
-                new SortableField('yesterday', 'Yesterday'),
-                new SortableField('week', 'Week'),
-                new SortableField('month', 'Month'),
-                new SortableField('year', 'Year'),
-                new SortableField('all', 'All_Time'),
-            )),
-            new SortableField('duration', 'Duration', array(
-                new SortableField('today', 'Today'),
-                new SortableField('yesterday', 'Yesterday'),
-                new SortableField('week', 'Week'),
-                new SortableField('month', 'Month'),
-                new SortableField('year', 'Year'),
-                new SortableField('all', 'All_Time'),
-            )),
-            new SortableField('date', 'Submitted', array(
-                new SortableField('today', 'Today'),
-                new SortableField('yesterday', 'Yesterday'),
-                new SortableField('week', 'Week'),
-                new SortableField('month', 'Month'),
-                new SortableField('year', 'Year'),
-                new SortableField('all', 'All_Time'),
-            )),
-            new SortableField('commented', 'Comments', array(
-                new SortableField('today', 'Today'),
-                new SortableField('yesterday', 'Yesterday'),
-                new SortableField('week', 'Week'),
-                new SortableField('month', 'Month'),
-                new SortableField('year', 'Year'),
-                new SortableField('all', 'All_Time'),
-            )),
-        )))
-            ->add(new SortableField('new', 'Upcoming', array(
-            new SortableField('viewed', 'Views', array(
-                new SortableField('today', 'Today'),
-                new SortableField('yesterday', 'Yesterday'),
-                new SortableField('week', 'Week'),
-                new SortableField('month', 'Month'),
-                new SortableField('year', 'Year'),
-                new SortableField('all', 'All_Time'),
-                new SortableField('votes_left', 'VotesLeft'),
-            )),
-            new SortableField('rated', 'Rating', array(
-                new SortableField('today', 'Today'),
-                new SortableField('yesterday', 'Yesterday'),
-                new SortableField('week', 'Week'),
-                new SortableField('month', 'Month'),
-                new SortableField('year', 'Year'),
-                new SortableField('all', 'All_Time'),
-                new SortableField('votes_left', 'VotesLeft'),
-            )),
-            new SortableField('duration', 'Duration', array(
-                new SortableField('today', 'Today'),
-                new SortableField('yesterday', 'Yesterday'),
-                new SortableField('week', 'Week'),
-                new SortableField('month', 'Month'),
-                new SortableField('year', 'Year'),
-                new SortableField('all', 'All_Time'),
-                new SortableField('votes_left', 'VotesLeft'),
-            )),
-            new SortableField('date', 'Submitted', array(
-                new SortableField('today', 'Today'),
-                new SortableField('yesterday', 'Yesterday'),
-                new SortableField('week', 'Week'),
-                new SortableField('month', 'Month'),
-                new SortableField('year', 'Year'),
-                new SortableField('all', 'All_Time'),
-                new SortableField('votes_left', 'VotesLeft'),
-            )),
-            new SortableField('commented', 'Comments', array(
-                new SortableField('today', 'Today'),
-                new SortableField('yesterday', 'Yesterday'),
-                new SortableField('week', 'Week'),
-                new SortableField('month', 'Month'),
-                new SortableField('year', 'Year'),
-                new SortableField('all', 'All_Time'),
-                new SortableField('votes_left', 'VotesLeft'),
-            )),
+          ->add(
+            new SortableField('featured', 'Featured', array(
+                new SortableField('viewed', 'Views', array(
+                    new SortableField('today', 'Today'),
+                    new SortableField('yesterday', 'Yesterday'),
+                    new SortableField('week', 'Week'),
+                    new SortableField('month', 'Month'),
+                    new SortableField('year', 'Year'),
+                    new SortableField('all', 'All_Time'),
+                )),
+                new SortableField('rated', 'Rating', array(
+                    new SortableField('today', 'Today'),
+                    new SortableField('yesterday', 'Yesterday'),
+                    new SortableField('week', 'Week'),
+                    new SortableField('month', 'Month'),
+                    new SortableField('year', 'Year'),
+                    new SortableField('all', 'All_Time'),
+                )),
+                new SortableField('duration', 'Duration', array(
+                    new SortableField('today', 'Today'),
+                    new SortableField('yesterday', 'Yesterday'),
+                    new SortableField('week', 'Week'),
+                    new SortableField('month', 'Month'),
+                    new SortableField('year', 'Year'),
+                    new SortableField('all', 'All_Time'),
+                )),
+                new SortableField('date', 'Submitted', array(
+                    new SortableField('today', 'Today'),
+                    new SortableField('yesterday', 'Yesterday'),
+                    new SortableField('week', 'Week'),
+                    new SortableField('month', 'Month'),
+                    new SortableField('year', 'Year'),
+                    new SortableField('all', 'All_Time'),
+                )),
+                new SortableField('commented', 'Comments', array(
+                    new SortableField('today', 'Today'),
+                    new SortableField('yesterday', 'Yesterday'),
+                    new SortableField('week', 'Week'),
+                    new SortableField('month', 'Month'),
+                    new SortableField('year', 'Year'),
+                    new SortableField('all', 'All_Time'),
+                )),
+            ))
+        )
+          ->add(
+            new SortableField('new', 'Upcoming', array(
+                new SortableField('viewed', 'Views', array(
+                    new SortableField('today', 'Today'),
+                    new SortableField('yesterday', 'Yesterday'),
+                    new SortableField('week', 'Week'),
+                    new SortableField('month', 'Month'),
+                    new SortableField('year', 'Year'),
+                    new SortableField('all', 'All_Time'),
+                    new SortableField('votes_left', 'VotesLeft'),
+                )),
+                new SortableField('rated', 'Rating', array(
+                    new SortableField('today', 'Today'),
+                    new SortableField('yesterday', 'Yesterday'),
+                    new SortableField('week', 'Week'),
+                    new SortableField('month', 'Month'),
+                    new SortableField('year', 'Year'),
+                    new SortableField('all', 'All_Time'),
+                    new SortableField('votes_left', 'VotesLeft'),
+                )),
+                new SortableField('duration', 'Duration', array(
+                    new SortableField('today', 'Today'),
+                    new SortableField('yesterday', 'Yesterday'),
+                    new SortableField('week', 'Week'),
+                    new SortableField('month', 'Month'),
+                    new SortableField('year', 'Year'),
+                    new SortableField('all', 'All_Time'),
+                    new SortableField('votes_left', 'VotesLeft'),
+                )),
+                new SortableField('date', 'Submitted', array(
+                    new SortableField('today', 'Today'),
+                    new SortableField('yesterday', 'Yesterday'),
+                    new SortableField('week', 'Week'),
+                    new SortableField('month', 'Month'),
+                    new SortableField('year', 'Year'),
+                    new SortableField('all', 'All_Time'),
+                    new SortableField('votes_left', 'VotesLeft'),
+                )),
+                new SortableField('commented', 'Comments', array(
+                    new SortableField('today', 'Today'),
+                    new SortableField('yesterday', 'Yesterday'),
+                    new SortableField('week', 'Week'),
+                    new SortableField('month', 'Month'),
+                    new SortableField('year', 'Year'),
+                    new SortableField('all', 'All_Time'),
+                    new SortableField('votes_left', 'VotesLeft'),
+                )),
 
-        )))
-            ->add(new SortableField('search', 'search', array(
-            new SortableField('relevance', 'Relevance'),
-            new SortableField('viewed', 'Views'),
-            new SortableField('rated', 'Rating'),
-            new SortableField('duration', 'Duration'),
-            new SortableField('date', 'Submitted'),
-            new SortableField('commented', 'Comments')
-        )))
-            ->add(new SortableField('category', 'category', array(
-            new SortableField('viewed', 'Views'),
-            new SortableField('rated', 'Rating'),
-            new SortableField('duration', 'Duration'),
-            new SortableField('date', 'Submitted'),
-            new SortableField('title', 'Title')
-        )))
-            ->add(new SortableField('rated', 'Rating', array(
-            new SortableField('today', 'Today'),
-            new SortableField('yesterday', 'Yesterday'),
-            new SortableField('week', 'Week'),
-            new SortableField('month', 'Month'),
-            new SortableField('year', 'Year'),
-            new SortableField('all', 'All_Time'),
-        )))
-            ->add(new SortableField('viewed', 'Views', array(
-            new SortableField('today', 'Today'),
-            new SortableField('yesterday', 'Yesterday'),
-            new SortableField('week', 'Week'),
-            new SortableField('month', 'Month'),
-            new SortableField('year', 'Year'),
-            new SortableField('all', 'All_Time'),
-        )))
-            ->add(new SortableField('commented', 'Comments', array(
-            new SortableField('today', 'Today'),
-            new SortableField('yesterday', 'Yesterday'),
-            new SortableField('week', 'Week'),
-            new SortableField('month', 'Month'),
-            new SortableField('year', 'Year'),
-            new SortableField('all', 'All_Time'),
-        )));
+            ))
+        )
+          ->add(
+            new SortableField('search', 'search', array(
+                new SortableField('relevance', 'Relevance'),
+                new SortableField('viewed', 'Views'),
+                new SortableField('rated', 'Rating'),
+                new SortableField('duration', 'Duration'),
+                new SortableField('date', 'Submitted'),
+                new SortableField('commented', 'Comments')
+            ))
+        )
+          ->add(
+            new SortableField('category', 'category', array(
+                new SortableField('viewed', 'Views'),
+                new SortableField('rated', 'Rating'),
+                new SortableField('duration', 'Duration'),
+                new SortableField('date', 'Submitted'),
+                new SortableField('title', 'Title')
+            ))
+        )
+          ->add(
+            new SortableField('rated', 'Rating', array(
+                new SortableField('today', 'Today'),
+                new SortableField('yesterday', 'Yesterday'),
+                new SortableField('week', 'Week'),
+                new SortableField('month', 'Month'),
+                new SortableField('year', 'Year'),
+                new SortableField('all', 'All_Time'),
+            ))
+        )
+          ->add(
+            new SortableField('viewed', 'Views', array(
+                new SortableField('today', 'Today'),
+                new SortableField('yesterday', 'Yesterday'),
+                new SortableField('week', 'Week'),
+                new SortableField('month', 'Month'),
+                new SortableField('year', 'Year'),
+                new SortableField('all', 'All_Time'),
+            ))
+        )
+          ->add(
+            new SortableField('commented', 'Comments', array(
+                new SortableField('today', 'Today'),
+                new SortableField('yesterday', 'Yesterday'),
+                new SortableField('week', 'Week'),
+                new SortableField('month', 'Month'),
+                new SortableField('year', 'Year'),
+                new SortableField('all', 'All_Time'),
+            ))
+        );
     }
 
     public function populateCategories(CategoryContainer $categories)
@@ -166,21 +180,29 @@ class Spankwire extends AbstractProvider
     public function populateContentTemplate(Content $contentTemplate)
     {
         $contentTemplate
-            ->addField(new Segment\Image('thumbnail', array(
-            'width' => 320,
-            'height' => 240,
-        )))
-            ->addField(new Segment\ImageCollection('thumbroll', array(
-            'width' => 320,
-            'height' => 240,
-        )))
-            ->addField(new Segment\Title('title', array(
-            'visible_on_list' => false,
-        )))
-            ->addField(new Segment\Url('url', array(
-            'display_on_list' => false,
-        )))
-            ->setWidth(320);
+          ->addField(
+            new Segment\Image('thumbnail', array(
+                'width' => 320,
+                'height' => 240,
+            ))
+        )
+          ->addField(
+            new Segment\ImageCollection('thumbroll', array(
+                'width' => 320,
+                'height' => 240,
+            ))
+        )
+          ->addField(
+            new Segment\Title('title', array(
+                'visible_on_list' => false,
+            ))
+        )
+          ->addField(
+            new Segment\Url('url', array(
+                'display_on_list' => false,
+            ))
+        )
+          ->setWidth(320);
     }
 
     public function isSearchable()
@@ -213,7 +235,7 @@ class Spankwire extends AbstractProvider
             $contentUrl = $videoNode->filterXPath("//div[@class='thmb-wrapper']/a")->link()->getUri();
             $content->setUrl($contentUrl);
             $content->set('url', $contentUrl);
-            preg_match('{/video(\d+)/?$}',$contentUrl,$resultId);
+            preg_match('{/video(\d+)/?$}', $contentUrl, $resultId);
             $content->setId($resultId[1]);
             $collection->addContent($content);
         }
@@ -225,6 +247,7 @@ class Spankwire extends AbstractProvider
         foreach ($thumbrollIndexes as $index) {
             $thumbroll[] = str_replace('{index}', $index, $thumbrollBase);
         }
+
         return $thumbroll;
     }
 
@@ -256,12 +279,19 @@ class Spankwire extends AbstractProvider
         if (count($query)) {
             $url .= '?' . http_build_query($query);
         }
+
         return $url;
     }
 
     public function populateContent(Content $content)
     {
-        // TODO: Implement populateContent() method.
+        /** @var $response \Buzz\Message\Response */
+        $response = $this->client->get($content->getUrl());
+        $crawler = new Crawler($response->getContent(), $content->getUrl());
+
+        $title = $crawler->filterXPath('//h1')->eq(2)->text();
+
+        $content->set('title', $title);
     }
 
 }
