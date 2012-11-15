@@ -55,7 +55,7 @@
 {% endblock %}
 
 {% block mapper_textarea_widget %}
-    {{ form_widget(form,{'attr':{'data-wysiwyg':wysiwyg }}) }}
+    {{ form_widget(form,{'attr':attr|merge({'data-wysiwyg':wysiwyg })}) }}
 {% endblock %}
 
 {% block mapper_data_widget %}
