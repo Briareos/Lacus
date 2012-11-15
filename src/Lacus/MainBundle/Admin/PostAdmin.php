@@ -152,19 +152,20 @@ class PostAdmin extends Admin
         $list
           ->addIdentifier('createdAt')
           ->add(
-            'mapper.site',
-            null,
-            array(
-                'associated_tostring' => 'getName',
-            )
-        )
-          ->add(
             'mapper',
             null,
             array(
                 'associated_tostring' => 'getName',
             )
         )
+          ->add(
+            'mapper.site',
+            null,
+            array(
+                'associated_tostring' => 'getName',
+            )
+        )
+          ->add('mapper.provider')
           ->add(
             'status',
             null,
