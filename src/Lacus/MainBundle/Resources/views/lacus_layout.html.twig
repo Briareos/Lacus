@@ -15,7 +15,8 @@
 
 {% block top_bar_after_nav %}
     {% if is_granted('ROLE_SONATA_ADMIN') and admin_pool.getInstance('sonata.main.admin.post').isGranted('LIST') %}
-        <li class="{% if app.request.attributes.get('_route') == 'admin_lacus_main_post_list' %}active{% endif %}"><a href="{{ path('admin_lacus_main_post_list') }}">Posts</a></li>
+        {% set posts_pending_review = admin_pool.getInstance('sonata.main.admin.post').getPostCountByStatus('review') %}
+        <li class="{% if app.request.attributes.get('_route') == 'admin_lacus_main_post_list' %}active{% endif %}"><a href="{{ path('admin_lacus_main_post_list') }}">Posts {% if posts_pending_review > 0 %}<span class="badge badge-warning">{{ posts_pending_review }}</span>{% endif %}</a></li>
     {% endif %}
     {% if is_granted('ROLE_SONATA_ADMIN') and admin_pool.getInstance('sonata.main.admin.post').hasAccessToAnyProvider() %}
         <li class="{% if app.request.attributes.get('_route') == 'admin_lacus_main_post_provider_list' %}active{% endif %}"><a href="{{ path('admin_lacus_main_post_provider_list') }}">Providers</a></li>

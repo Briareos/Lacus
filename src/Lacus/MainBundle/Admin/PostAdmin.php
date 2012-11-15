@@ -347,4 +347,15 @@ class PostAdmin extends Admin
 
         return $this->isGranted('EDIT', $post);
     }
+
+    public function getPostCountByStatus($status)
+    {
+        /** @var $qb \Doctrine\ORM\QueryBuilder */
+        $qb = $this->createQuery('list');
+        $qb->select('COUNT(o.id) AS cnt');
+        $qb->andWhere('o.status = :status');
+        $qb->setParameter('status', $status);
+
+        return $qb->getQuery()->execute(null, \Doctrine\ORM\Query::HYDRATE_SINGLE_SCALAR);
+    }
 }
