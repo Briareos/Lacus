@@ -93,12 +93,37 @@ class MapperAdmin extends Admin
           ->add('submitUrl')
           ->add('submitButton')
           ->end();
+
+        $form->with("Automated check")
+          ->add(
+            'successText',
+            null,
+            array(
+                'required' => false,
+            )
+        )
+          ->add(
+            'failureText',
+            null,
+            array(
+                'required' => false,
+            )
+        )
+          ->end();
     }
 
     protected function configureListFields(ListMapper $list)
     {
         $list
           ->addIdentifier('name')
+          ->add(
+            'site',
+            null,
+            array(
+                'associated_tostring' => 'getName',
+            )
+        )
+          ->add('provider')
           ->add(
             '_action',
             'actions',

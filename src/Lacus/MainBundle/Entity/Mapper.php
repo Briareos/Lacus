@@ -87,6 +87,20 @@ class Mapper
      */
     private $defaultAccount;
 
+    /**
+     * @var string
+     *
+     * @ORM\Column(name="successText", type="text", nullable=true)
+     */
+    private $successText;
+
+    /**
+     * @var string
+     *
+     * @ORM\Column(name="failureText", type="text", nullable=true)
+     */
+    private $failureText;
+
 
     public function __construct()
     {
@@ -268,5 +282,37 @@ class Mapper
     public function isConfigured()
     {
         return $this->data !== null;
+    }
+
+    /**
+     * @return string
+     */
+    public function getSuccessText()
+    {
+        return $this->successText;
+    }
+
+    /**
+     * @param string $successText
+     */
+    public function setSuccessText($successText)
+    {
+        $this->successText = $successText;
+    }
+
+    /**
+     * @return string
+     */
+    public function getFailureText()
+    {
+        return $this->failureText;
+    }
+
+    /**
+     * @param string $failureText
+     */
+    public function setFailureText($failureText)
+    {
+        $this->failureText = $failureText;
     }
 }

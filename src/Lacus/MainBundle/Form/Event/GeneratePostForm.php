@@ -102,7 +102,7 @@ class GeneratePostForm implements EventSubscriberInterface
         );
         $form->add($filesBuilder);
 
-        $published = ($post->getStatus() === Post::STATUS_PUBLISH);
+        $published = ($post->getStatus() === Post::STATUS_PUBLISH || $post->getStatus() === Post::STATUS_ARCHIVE);
         foreach ($mapperData['fields'] as $mapperFieldName => $mapperField) {
             $formField = $this->createField($post->getSafeFieldName($mapperFieldName), $mapperField['field'], $mapperField['segment'], $published);
             $contentBuilder->add($formField);
@@ -226,7 +226,7 @@ class GeneratePostForm implements EventSubscriberInterface
                       ->setParameter('site', $mapper->getSite())
                       ->orderBy('a.id', 'ASC');
                 },
-                'disabled' => ($post->getStatus() === Post::STATUS_PUBLISH),
+                'disabled' => ($post->getStatus() === Post::STATUS_PUBLISH || $post->getStatus() === Post::STATUS_ARCHIVE),
             )
         );
         $event->getForm()->add($account);

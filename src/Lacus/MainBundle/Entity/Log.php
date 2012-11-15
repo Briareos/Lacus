@@ -37,6 +37,13 @@ class Log
     private $response;
 
     /**
+     * @var string
+     *
+     * @ORM\Column(name="error", type="text", nullable=true)
+     */
+    private $error;
+
+    /**
      * @var Post
      *
      * @ORM\ManyToOne(targetEntity="Post", inversedBy="logs")
@@ -52,6 +59,11 @@ class Log
      */
     private $user;
 
+    /**
+     * @var string
+     *
+     * @ORM\Column(name="status", type="string", length=255)
+     */
     private $status;
 
 
@@ -156,5 +168,21 @@ class Log
     public function setUser(User $user = null)
     {
         $this->user = $user;
+    }
+
+    /**
+     * @return string
+     */
+    public function getError()
+    {
+        return $this->error;
+    }
+
+    /**
+     * @param string $error
+     */
+    public function setError($error)
+    {
+        $this->error = $error;
     }
 }

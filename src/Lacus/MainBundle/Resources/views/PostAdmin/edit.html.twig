@@ -10,7 +10,7 @@
         <dd>{{ object.user.username }}</dd>
         {% if object.postedAt %}
             <dt>Submitted at</dt>
-            <dd>{{ object.submittedAt|date('H:i:s \\o\\n d. m. Y.') }}</dd>
+            <dd>{{ object.postedAt|date('H:i:s \\o\\n d. m. Y.') }}</dd>
         {% endif %}
         <dt>Content type</dt>
         <dd>{{ object.mapper.name }}</dd>

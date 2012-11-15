@@ -3,6 +3,7 @@
 namespace Lacus\MainBundle\Entity;
 
 use Doctrine\ORM\Mapping as ORM;
+use Buzz\Message\Response;
 use Application\Sonata\UserBundle\Entity\User;
 use Doctrine\Common\Collections\ArrayCollection;
 use Lacus\MainBundle\Post\FieldNameConverterTrait;
@@ -119,6 +120,16 @@ class Post
      * @ORM\JoinColumn(name="user", referencedColumnName="id", onDelete="SET NULL")
      */
     private $user;
+
+    /**
+     * @var Response
+     */
+    private $lastResponse;
+
+    /**
+     * @var string
+     */
+    private $lastError;
 
 
     function __construct(Mapper $mapper)
@@ -378,6 +389,26 @@ class Post
         }
 
         return $fileFields;
+    }
+
+    public function setLastResponse(Response $response)
+    {
+        $this->lastResponse = $response;
+    }
+
+    public function getLastResponse()
+    {
+        return $this->lastResponse;
+    }
+
+    public function getLastError()
+    {
+        return $this->lastError;
+    }
+
+    public function setLastError($lastError)
+    {
+        $this->lastError = $lastError;
     }
 
 }

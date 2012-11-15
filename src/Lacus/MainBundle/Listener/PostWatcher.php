@@ -19,6 +19,8 @@ class PostWatcher
      */
     private $container;
 
+    private $publish = array();
+
     function __construct(Producer $postPoster, ContainerInterface $container)
     {
         $this->postPoster = $postPoster;
@@ -44,9 +46,8 @@ class PostWatcher
         if ($entity instanceof Post) {
             if ($args->hasChangedField('status')) {
                 $this->createLog($args->getEntityManager(), $entity);
-
                 if ($entity->getStatus() === Post::STATUS_PUBLISH) {
-                    $this->enqueue($entity);
+                    $this->publish[spl_object_hash($entity)] = true;
                 }
             }
         }
@@ -58,6 +59,9 @@ class PostWatcher
         if ($entity instanceof Post) {
             // Since we can't flush for log entities inside preUpdate, we do it here.
             $args->getEntityManager()->flush();
+            if (!empty($this->publish[spl_object_hash($entity)])) {
+                $this->enqueue($entity);
+            }
         }
     }
 
@@ -67,6 +71,12 @@ class PostWatcher
         $log->setPost($post);
         $log->setStatus($post->getStatus());
         $log->setUser($this->getUser());
+        if ($post->getLastError() !== null) {
+            $log->setError($post->getLastError());
+        }
+        if ($post->getLastResponse() !== null) {
+            $log->setResponse($post->getLastResponse()->getContent());
+        }
         $em->persist($log);
     }
 

@@ -152,6 +152,20 @@ class PostAdmin extends Admin
         $list
           ->addIdentifier('createdAt')
           ->add(
+            'mapper.site',
+            null,
+            array(
+                'associated_tostring' => 'getName',
+            )
+        )
+          ->add(
+            'mapper',
+            null,
+            array(
+                'associated_tostring' => 'getName',
+            )
+        )
+          ->add(
             'status',
             null,
             array(
@@ -310,8 +324,12 @@ class PostAdmin extends Admin
         $publishStatuses = array(Post::STATUS_QUEUE, Post::STATUS_PUBLISH);
         $automatedStatuses = array(Post::STATUS_ARCHIVE, Post::STATUS_FAILURE);
 
-        if($currentStatus === $status) {
+        if ($currentStatus === $status) {
             return true;
+        }
+
+        if ($currentStatus === Post::STATUS_ARCHIVE) {
+            return false;
         }
 
         if (!$post->getId() && in_array($status, $automatedStatuses)) {
