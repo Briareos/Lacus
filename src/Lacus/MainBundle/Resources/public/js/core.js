@@ -30,11 +30,27 @@ $(function () {
                 }
             },
             error:function () {
-
             }
         });
         return false;
     });
+
+    $(document).on('click', 'a.get-post-logs', function (e) {
+        var $a = $(this);
+        $('a.get-post-logs').removeClass('active');
+        $a.addClass('active');
+        $.ajax({
+            url:$a.attr('href'),
+            success:function (data) {
+                if (data.status === "OK") {
+                    $(data.logs).modal('show');
+                }
+            }
+        });
+        return false;
+    });
+
+    $('[rel="tooltip"]').tooltip();
 
     window.attach = function ($context) {
         $('textarea[data-wysiwyg="1"]:not(:disabled)', $context).redactor({

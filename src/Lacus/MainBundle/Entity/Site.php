@@ -3,6 +3,7 @@
 namespace Lacus\MainBundle\Entity;
 
 use Doctrine\ORM\Mapping as ORM;
+use Application\Sonata\UserBundle\Entity\User;
 use Doctrine\Common\Collections\ArrayCollection;
 
 /**
@@ -297,5 +298,15 @@ class Site
     public function setUsers($users)
     {
         $this->users = $users;
+    }
+
+    public function addUser(User $user)
+    {
+        $this->users->add($user);
+    }
+
+    public function removeUser(User $user)
+    {
+        $this->users->removeElement($user);
     }
 }

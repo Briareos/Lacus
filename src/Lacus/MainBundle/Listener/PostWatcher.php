@@ -71,8 +71,8 @@ class PostWatcher
         $log->setPost($post);
         $log->setStatus($post->getStatus());
         $log->setUser($this->getUser());
-        if ($post->getLastError() !== null) {
-            $log->setError($post->getLastError());
+        if ($post->getLastMessage() !== null) {
+            $log->setMessage($post->getLastMessage());
         }
         if ($post->getLastResponse() !== null) {
             $log->setResponse($post->getLastResponse()->getContent());

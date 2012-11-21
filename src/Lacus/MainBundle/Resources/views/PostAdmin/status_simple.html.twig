@@ -1,0 +1,15 @@
+{% if status == 'draft' %}
+    {% set class = 'inverse' %}
+{% elseif status =='review' %}
+    {% set class='warning' %}
+{% elseif status =='queue' %}
+    {% set class='info' %}
+{% elseif status =='publish' %}
+    {% set class='info' %}
+{% elseif status =='archive' %}
+    {% set class='success' %}
+{% else %}
+    {% set class='important' %}
+{% endif %}
+
+<span class="label label-{{ class }}">{{ status }}</span>

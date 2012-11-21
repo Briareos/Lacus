@@ -110,6 +110,7 @@ class Post
      * @var ArrayCollection
      *
      * @ORM\OneToMany(targetEntity="Log", mappedBy="post")
+     * @ORM\OrderBy({"createdAt":"DESC"})
      */
     private $logs;
 
@@ -129,7 +130,7 @@ class Post
     /**
      * @var string
      */
-    private $lastError;
+    private $lastMessage;
 
 
     function __construct(Mapper $mapper)
@@ -401,14 +402,14 @@ class Post
         return $this->lastResponse;
     }
 
-    public function getLastError()
+    public function getLastMessage()
     {
-        return $this->lastError;
+        return $this->lastMessage;
     }
 
-    public function setLastError($lastError)
+    public function setLastMessage($lastMessage)
     {
-        $this->lastError = $lastError;
+        $this->lastMessage = $lastMessage;
     }
 
 }

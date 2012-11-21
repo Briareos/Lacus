@@ -3,6 +3,7 @@
 namespace Lacus\MainBundle\Admin;
 
 use Sonata\AdminBundle\Admin\Admin;
+use Doctrine\ORM\Query;
 use Symfony\Component\Security\Core\SecurityContextInterface;
 use Sonata\AdminBundle\Datagrid\DatagridMapper;
 use Lacus\MainBundle\Entity\Post;
@@ -117,6 +118,20 @@ class PostAdmin extends Admin
                 'status' => '(' . implode('|', array(Post::STATUS_DRAFT, Post::STATUS_REVIEW, Post::STATUS_QUEUE, Post::STATUS_PUBLISH, Post::STATUS_ARCHIVE, Post::STATUS_FAILURE)) . ')',
             )
         );
+        $collection->add(
+            'get_logs',
+            '{id}/get-logs',
+            array(
+                '_controller' => 'MainBundle:PostAdmin:getLogs',
+            )
+        );
+        $collection->add(
+            'log_iframe',
+            'log/{logId}/iframe',
+            array(
+                '_controller' => 'MainBundle:PostAdmin:logIframe',
+            )
+        );
     }
 
     public function getFormBuilder()
@@ -165,12 +180,29 @@ class PostAdmin extends Admin
                 'associated_tostring' => 'getName',
             )
         )
-          ->add('mapper.provider')
+          ->add(
+            'mapper.provider'
+            ,
+            null,
+            array(
+                'label' => 'Provider',
+                'template' => 'MainBundle:PostAdmin:list_provider.html.twig',
+            )
+        )
           ->add(
             'status',
             null,
             array(
+                'label' => 'Status',
                 'template' => 'MainBundle:PostAdmin:list_status.html.twig',
+            )
+        )
+          ->add(
+            'logs',
+            null,
+            array(
+                'label' => 'Logs',
+                'template' => 'MainBundle:PostAdmin:list_logs.html.twig',
             )
         );
     }
@@ -235,22 +267,21 @@ class PostAdmin extends Admin
 
     public function isGranted($name, $object = null)
     {
-        if ($name === 'CREATE') {
-            return false;
-        }
-        if ($name === 'PUBLISH') {
-            if (parent::isGranted('PUBLISH', $object)) {
+        /** @var $object Post */
+        if ($name === 'EDIT' || $name === 'VIEW' || $name === 'DELETE' || $name === 'MASTER' || $name === 'PUBLISH') {
+            if (parent::isGranted(sprintf('%s_ALL', $name))) {
                 return true;
             }
             if ($object === null) {
                 return false;
             }
-            /** @var $object Post */
             if ($this->userOwnsPost($object)) {
-                return parent::isGranted('PUBLISH_OWN', $object);
+                return parent::isGranted(sprintf('%s_OWN', $name), $object);
             } else {
                 return false;
             }
+        } elseif ($name === 'LIST') {
+            return parent::isGranted('LIST_OWN') || parent::isGranted('LIST_ALL');
         }
 
         return parent::isGranted($name, $object);
@@ -271,15 +302,25 @@ class PostAdmin extends Admin
     public function getSecurityInformation()
     {
         $providerAliases = $this->providerPool->getProviderAliases();
-        $securityInformation = array();
+        $securityInformation = array(
+            'EDIT_OWN' => array(),
+            'EDIT_ALL' => array(),
+            'LIST_OWN' => array(),
+            'LIST_ALL' => array(),
+            'VIEW_OWN' => array(),
+            'VIEW_ALL' => array(),
+            'DELETE_OWN' => array(),
+            'DELETE_ALL' => array(),
+            'MASTER_OWN' => array(),
+            'MASTER_ALL' => array(),
+            'PUBLISH_OWN' => array(),
+            'PUBLISH_ALL' => array(),
+        );
         foreach ($providerAliases as $providerAlias) {
             $securityInformation[sprintf('PROVIDER_%s', strtoupper($providerAlias))] = array();
         }
 
-        $securityInformation['PUBLISH'] = array();
-        $securityInformation['PUBLISH_OWN'] = array();
-
-        return parent::getSecurityInformation() + $securityInformation;
+        return $securityInformation;
     }
 
     public function hasAccessToProvider($provider)
@@ -356,6 +397,25 @@ class PostAdmin extends Admin
         $qb->andWhere('o.status = :status');
         $qb->setParameter('status', $status);
 
-        return $qb->getQuery()->execute(null, \Doctrine\ORM\Query::HYDRATE_SINGLE_SCALAR);
+        return $qb->getQuery()->execute(null, Query::HYDRATE_SINGLE_SCALAR);
+    }
+
+    public function createQuery($context = 'list')
+    {
+        /** @var $query \Doctrine\ORM\QueryBuilder */
+        $query = $this->getModelManager()->createQuery($this->getClass());
+        if (!$this->isGranted('LIST_ALL') && $this->isGranted('LIST_OWN')) {
+            $query->innerJoin('o.mapper', 'm');
+            $query->innerJoin('m.site', 's');
+            $query->andWhere(':user Member Of s.users');
+            $query->setParameter('user', $this->getUser());
+        }
+
+        foreach ($this->extensions as $extension) {
+            /** @var $extension \Sonata\AdminBundle\Admin\AdminExtensionInterface */
+            $extension->configureQuery($this, $query, $context);
+        }
+
+        return $query;
     }
 }

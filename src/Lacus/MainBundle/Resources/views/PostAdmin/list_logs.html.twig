@@ -1,0 +1,6 @@
+{% extends 'SonataAdminBundle:CRUD:base_list_field.html.twig' %}
+
+{% block field %}
+    <a class="btn btn-mini get-post-logs" href="{{ admin.generateObjectUrl('get_logs', object) }}"><span class="label label-warning">{{ object.logs|length }}</span> Log entries</a>
+{% endblock %}
+

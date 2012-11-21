@@ -101,6 +101,13 @@ class Mapper
      */
     private $failureText;
 
+    /**
+     * @var string
+     *
+     * @ORM\Column(name="responseMessageRegex", type="text", nullable=true)
+     */
+    private $responseMessageRegex;
+
 
     public function __construct()
     {
@@ -314,5 +321,21 @@ class Mapper
     public function setFailureText($failureText)
     {
         $this->failureText = $failureText;
+    }
+
+    /**
+     * @return string
+     */
+    public function getResponseMessageRegex()
+    {
+        return $this->responseMessageRegex;
+    }
+
+    /**
+     * @param string $responseMessageRegex
+     */
+    public function setResponseMessageRegex($responseMessageRegex)
+    {
+        $this->responseMessageRegex = $responseMessageRegex;
     }
 }

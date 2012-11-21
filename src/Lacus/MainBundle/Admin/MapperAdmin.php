@@ -109,6 +109,13 @@ class MapperAdmin extends Admin
                 'required' => false,
             )
         )
+          ->add(
+            'responseMessageRegex',
+            null,
+            array(
+                'required' => false,
+            )
+        )
           ->end();
     }
 

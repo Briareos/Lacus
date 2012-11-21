@@ -3,6 +3,7 @@
 namespace Lacus\MainBundle\Controller;
 
 use Sonata\AdminBundle\Controller\CRUDController;
+use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\HttpKernel\Exception\HttpException;
 use Symfony\Component\Security\Core\Exception\AccessDeniedException;
 use Lacus\MainBundle\Content\Exception\ValidationException;
@@ -342,5 +343,55 @@ class PostAdminController extends CRUDController
         );
     }
 
+    public function getLogsAction($id)
+    {
+        /** @var $post Post */
+        $post = $this->admin->getObject($id);
+
+        if (!$post) {
+            throw $this->createNotFoundException(sprintf('Unable to find the post with id : %s', $id));
+        }
+
+        if (!$this->getRequest()->isXmlHttpRequest()) {
+            throw new HttpException(400, 'This method must be accessed through ajax.');
+        }
+
+        if (!$this->admin->isGranted('VIEW', $post)) {
+            throw new AccessDeniedException();
+        }
+
+        return $this->renderJson(
+            array(
+                'status' => "OK",
+                'logs' => $this->renderView(
+                    'MainBundle:PostAdmin:logs.html.twig',
+                    array(
+                        'post' => $post,
+                        'admin' => $this->admin,
+                    )
+                )
+            )
+        );
+    }
+
+    public function logIframeAction($logId)
+    {
+        /** @var $log \Lacus\MainBundle\Entity\Log */
+        $log = $this->em->find('MainBundle:Log', $logId);
+
+        if (!$log) {
+            throw $this->createNotFoundException(sprintf('Unable to find the log with id : %s', $logId));
+        }
+
+        $post = $log->getPost();
+
+        if (!$this->admin->isGranted('VIEW', $post)) {
+            throw new AccessDeniedException();
+        }
+
+        $responseText = $log->getResponse();
+
+        return new Response($responseText);
+    }
 
 }

@@ -63,7 +63,7 @@ class User extends BaseUser
     }
 
     /**
-     * @return \Doctrine\Common\Collections\ArrayCollection
+     * @return \Lacus\MainBundle\Entity\Site[]
      */
     public function getSites()
     {
@@ -71,11 +71,27 @@ class User extends BaseUser
     }
 
     /**
-     * @param \Doctrine\Common\Collections\ArrayCollection $sites
+     * @param ArrayCollection $sites
      */
-    public function setSites($sites)
+    public function setSites(ArrayCollection $sites)
     {
-        $this->sites = $sites;
+        /** @var $sites \Lacus\MainBundle\Entity\Site[] */
+        /** @var $newSites \Lacus\MainBundle\Entity\Site[] */
+        $existingSites = $this->getSites();
+        $newSites = array();
+        foreach ($sites as $site) {
+            if (!isset($existingSites[$site->getId()])) {
+                $site->addUser($this);
+            }
+            $newSites[$site->getId()] = $site;
+        }
+        foreach ($existingSites as $site) {
+            if (!isset($newSites[$site->getId()])) {
+                $site->removeUser($this);
+            }
+        }
+        $this->setUpdatedAt(new \DateTime());
+        $this->sites = $newSites;
     }
 
     public function getLogs()

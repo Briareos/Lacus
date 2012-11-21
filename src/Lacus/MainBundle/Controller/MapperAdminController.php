@@ -62,6 +62,8 @@ class MapperAdminController extends CRUDController
             if ($form->isValid()) {
                 $this->admin->update($object);
                 $this->session->getFlashBag()->add('sonata_flash_success', 'flash_edit_success');
+
+                return $this->redirect($this->admin->generateObjectUrl('configure', $object));
             }
         }
 

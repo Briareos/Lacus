@@ -1,0 +1,12 @@
+{% extends 'SonataAdminBundle:CRUD:base_list_field.html.twig' %}
+
+{% block field %}
+    {% if admin.isGranted('PROVIDER_'~value|upper) %}
+        <a href="{{ path('admin_lacus_main_post_provider',{'provider':value}) }}">
+    {% endif %}
+    <span class="label label-inverse">{{ value|capitalize }}</span>
+    {% if admin.isGranted('PROVIDER_'~value|upper) %}
+        </a>
+    {% endif %}
+{% endblock %}
+

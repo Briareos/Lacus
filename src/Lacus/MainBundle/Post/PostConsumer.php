@@ -55,7 +55,7 @@ class PostConsumer implements ConsumerInterface
         } catch (\Exception $e) {
             $error = $e->getMessage();
         }
-        $post->setLastError($error);
+        $post->setLastMessage($error);
         $post->setStatus(Post::STATUS_FAILURE);
         if (!empty($response)) {
             $post->setLastResponse($response);

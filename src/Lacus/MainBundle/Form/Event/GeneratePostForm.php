@@ -140,48 +140,25 @@ class GeneratePostForm implements EventSubscriberInterface
 
     public function createField($name, $options, $segment, $readOnly = false)
     {
+        $fieldType = 'text';
+        $fieldOptions = array(
+            'required' => $options['required'],
+            'read_only' => $readOnly,
+            'disabled' => $readOnly,
+        );
         if (isset($options['value'])) {
-            return $this->factory->createNamed(
-                $name,
-                'hidden',
-                null,
-                array(
-                    'required' => false,
-                    'read_only' => true,
-                )
-            );
-        } elseif (isset($options['choices']) && is_array($options['choices'])) {
-            return $this->factory->createNamed(
-                $name,
-                'choice',
-                null,
-                array(
-                    'choices' => $options['choices'],
-                    'read_only' => $readOnly,
-                    'disabled' => $readOnly,
-                )
-            );
-        } elseif (isset($options['default'])) {
-            $fieldOptions = array(
-                'required' => false,
-                'read_only' => $readOnly,
-                'disabled' => $readOnly,
-            );
-            $fieldType = 'text';
-            if ($options['rows'] > 1) {
-                $fieldType = 'textarea';
-                $fieldOptions['attr']['rows'] = $options['rows'];
-            }
-
-            return $this->factory->createNamed($name, $fieldType, null, $fieldOptions);
-        } elseif (isset($segment['name'])) {
+            $fieldType = 'hidden';
+            $fieldOptions['read_only'] = true;
+        }
+        if ($options['is_url']) {
+            $fieldType = 'url';
+        }
+        if (isset($options['choices']) && is_array($options['choices'])) {
+            $fieldType = 'choice';
+            $fieldOptions['choices'] = $options['choices'];
+        }
+        if (isset($segment['name'])) {
             $contentField = $this->content->getField($segment['name']);
-            $fieldType = 'text';
-            $fieldOptions = array(
-                'required' => false,
-                'read_only' => $readOnly,
-                'disabled' => $readOnly,
-            );
             if ($contentField->getType() === 'image') {
                 /** @var $contentField \Lacus\MainBundle\Content\Segment\Image */
                 $fieldType = 'mapper_image';
@@ -189,18 +166,21 @@ class GeneratePostForm implements EventSubscriberInterface
                     $fieldOptions['show_alternatives'] = true;
                     $fieldOptions['alternatives'] = $contentField->getAlternatives();
                 }
-            } elseif ($options['rows'] > 1 || $options['wysiwyg']) {
-                $fieldType = 'mapper_textarea';
-                $fieldOptions['attr']['rows'] = $options['rows'];
-                if ($options['wysiwyg']) {
-                    $fieldOptions['wysiwyg'] = true;
-                }
             }
-
-            return $this->factory->createNamed($name, $fieldType, null, $fieldOptions);
-        } else {
-            throw new \RuntimeException('No field.value, field.default or segment.name options provided.');
         }
+        if ($options['rows'] > 1 || $options['wysiwyg']) {
+            $fieldType = 'mapper_textarea';
+            $fieldOptions['attr']['rows'] = $options['rows'];
+            $fieldOptions['wysiwyg'] = $options['wysiwyg'];
+        }
+        if ($options['max_length'] > 0) {
+            $fieldOptions['attr']['maxlength'] = $options['max_length'];
+        }
+        if ($options['min_length'] > 0) {
+            $fieldOptions['attr']['maxlength'] = $options['max_length'];
+        }
+
+        return $this->factory->createNamed($name, $fieldType, null, $fieldOptions);
     }
 
     private function addAccountField(FormEvent $event)

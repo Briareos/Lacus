@@ -1,0 +1,46 @@
+<div class="modal fade">
+    <div class="modal-body">
+        <table class="table table-bordered">
+            <tr>
+                <th>Date</th>
+                <th>Status</th>
+                <th>User</th>
+                <th>Messages</th>
+                <th>Response</th>
+                <th>Response message(s)</th>
+            </tr>
+            {% for log in post.logs %}
+                <tr>
+                    <td>{{ log.createdAt|date }}</td>
+                    <td>{% include 'MainBundle:PostAdmin:status_simple.html.twig' with {'status':log.status} %}</td>
+                    <td>
+                        {% if log.user %}
+                            {{ log.user.username }}
+                        {% else %}
+                            <em>Automated</em>
+                        {% endif %}
+                    </td>
+                    <td>{{ log.message ? log.message : '-' }}</td>
+                    <td>
+                        {% if log.response %}
+                            <a href="{{ path('admin_lacus_main_post_log_iframe',{'logId':log.id}) }}">View</a>
+                        {% else %}
+                            -
+                        {% endif %}
+                    </td>
+                    <td>
+                        {% if log.getResponseMessages()|length %}
+                            <ul>
+                                {% for message in log.getResponseMessages() %}
+                                    <li>{{ message }}</li>
+                                {% endfor %}
+                            </ul>
+                        {% else %}
+                            -
+                        {% endif %}
+                    </td>
+                </tr>
+            {% endfor %}
+        </table>
+    </div>
+</div>

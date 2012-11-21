@@ -39,9 +39,9 @@ class Log
     /**
      * @var string
      *
-     * @ORM\Column(name="error", type="text", nullable=true)
+     * @ORM\Column(name="message", type="text", nullable=true)
      */
-    private $error;
+    private $message;
 
     /**
      * @var Post
@@ -173,16 +173,31 @@ class Log
     /**
      * @return string
      */
-    public function getError()
+    public function getMessage()
     {
-        return $this->error;
+        return $this->message;
     }
 
     /**
-     * @param string $error
+     * @param string $message
      */
-    public function setError($error)
+    public function setMessage($message)
     {
-        $this->error = $error;
+        $this->message = $message;
+    }
+
+    /**
+     * @return array
+     */
+    public function getResponseMessages()
+    {
+        $responseMessages = array();
+        $regex = $this->post->getMapper()->getResponseMessageRegex();
+        if ($this->getResponse() !== null && $regex !== null) {
+            preg_match_all($regex, $this->getResponse(), $resultMessages);
+            $responseMessages = $resultMessages[1];
+        }
+
+        return $responseMessages;
     }
 }

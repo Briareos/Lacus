@@ -10,7 +10,10 @@
             <generator strategy="AUTO"/>
         </id>
 
-        <many-to-many target-entity="Lacus\MainBundle\Entity\Site" mapped-by="users" field="sites">
+        <many-to-many target-entity="Lacus\MainBundle\Entity\Site" mapped-by="users" field="sites" index-by="id">
+            <cascade>
+                <cascade-persist/>
+            </cascade>
         </many-to-many>
 
         <one-to-many target-entity="Lacus\MainBundle\Entity\Post" mapped-by="user" field="posts">
