@@ -5,12 +5,12 @@
 {% block form %}
     <dl class="dl-horizontal">
         <dt>Submitted at</dt>
-        <dd>{{ object.createdAt|date('H:i:s \\o\\n d. m. Y.') }}</dd>
+        <dd>{{ object.createdAt|date }}</dd>
         <dt>By</dt>
         <dd>{{ object.user.username }}</dd>
         {% if object.postedAt %}
             <dt>Submitted at</dt>
-            <dd>{{ object.postedAt|date('H:i:s \\o\\n d. m. Y.') }}</dd>
+            <dd>{{ object.postedAt|date }}</dd>
         {% endif %}
         <dt>Content type</dt>
         <dd>{{ object.mapper.name }}</dd>

@@ -34,6 +34,10 @@ class PostConsumer implements ConsumerInterface
         if (!$post instanceof Post) {
             return false;
         }
+        if($post->getStatus() !== Post::STATUS_PUBLISH) {
+            // The status of this post was changed after it entered message queue, so just ignore it.
+            return true;
+        }
         try {
             $response = $this->poster->post($post);
             $post->setPostedAt(new \DateTime());
