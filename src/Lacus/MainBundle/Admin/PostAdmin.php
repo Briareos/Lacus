@@ -370,7 +370,7 @@ class PostAdmin extends Admin
             return true;
         }
 
-        if ($currentStatus === Post::STATUS_ARCHIVE) {
+        if ($currentStatus === Post::STATUS_ARCHIVE && $status !== Post::STATUS_FAILURE) {
             return false;
         }
 
