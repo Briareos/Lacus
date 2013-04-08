@@ -203,7 +203,7 @@ class Pornhub extends AbstractProvider
         /** @var $response \Buzz\Message\Response */
         $response = $this->client->get($url, $this->getGenericHeaders());
         $crawler = new Crawler($response->getContent(), $url);
-        $categoryNodes = $crawler->filterXPath("//nav[@class='nf-categories']/div[@class='videos_wrapper']/ul[@class='nf-categories']/li/a[starts-with(@href,'/video?c=')]");
+        $categoryNodes = $crawler->filterXPath("//ul[contains(@class,'nf-categories')]/li/a[starts-with(@href,'/video?c=')]");
         $categoryInfo = $categoryNodes->extract(array('_text', 'href'));
         foreach ($categoryInfo as $category) {
             $queryRaw = parse_url($category[1], PHP_URL_QUERY);
