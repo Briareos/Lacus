@@ -28,11 +28,11 @@ class Youporn extends AbstractProvider
 
     public function populateCategories(CategoryContainer $categories)
     {
-        $url = 'http://www.youporn.com/recommended/';
+        $url = 'http://www.youporn.com/';
         /** @var $response \Buzz\Message\Response */
         $response = $this->client->get($url, $this->getGenericHeaders());
         $crawler = new Crawler($response->getContent(), $url);
-        $categoryNodes = $crawler->filterXPath("//div[@class='dropDownBody rounded']/div/ul/li/a");
+        $categoryNodes = $crawler->filterXPath("//div[@class='popdownContent']/div/ul/li/a");
         foreach ($categoryNodes as $categoryDomNode) {
             /** @var $categoryNode \Symfony\Component\DomCrawler\Crawler */
             $categoryNode = new Crawler($categoryDomNode, $url);
@@ -76,7 +76,7 @@ class Youporn extends AbstractProvider
         $crawler = new Crawler($response->getContent(), $url);
 
         if ((!$this->getSearch() && $this->getCategory() && $this->getPage() === 1)
-            || (!$this->getCategory() && !$this->getSort() && $this->getPage() > 1)
+            || (!$this->getCategory() && !$this->getSort() && $this->getPage() === 1)
         ) {
             $xPath = "//div[contains(@class,'videoList')][2]/ul/li[contains(@class,'videoBox')]";
         } else {
@@ -151,10 +151,9 @@ class Youporn extends AbstractProvider
         } elseif ($this->getSort() && $this->getSort()->getParent()) {
             $url .= $this->getSort()->getParent()->getId() . '/' . $this->getSort()->getId() . '/';
         } elseif ($this->getSort() && $this->getSort()->getId()) {
-            $url .= 'browse/' . $this->getSort()->getId() . '/';
+            $url .= $this->getSort()->getId() . '/';
         }
         $query['page'] = $this->getPage();
-        $query['type'] = 'straight';
         $url = $url . '?' . http_build_query($query);
         return $url;
     }
