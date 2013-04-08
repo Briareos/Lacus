@@ -155,104 +155,104 @@ class PostAdmin extends Admin
     protected function configureFormFields(FormMapper $form)
     {
         $form
-          ->with("General")
-          ->add('status')
-          ->end()
-          ->with("Content")
-          ->end();
+            ->with("General")
+            ->add('status')
+            ->end()
+            ->with("Content")
+            ->end();
     }
 
     protected function configureListFields(ListMapper $list)
     {
         $list
-          ->addIdentifier('createdAt')
-          ->add(
-            'mapper',
-            null,
-            array(
-                'associated_tostring' => 'getName',
+            ->addIdentifier('createdAt')
+            ->add(
+                'mapper',
+                null,
+                array(
+                    'associated_tostring' => 'getName',
+                )
             )
-        )
-          ->add(
-            'mapper.site',
-            null,
-            array(
-                'associated_tostring' => 'getName',
+            ->add(
+                'mapper.site',
+                null,
+                array(
+                    'associated_tostring' => 'getName',
+                )
             )
-        )
-          ->add(
-            'mapper.provider'
-            ,
-            null,
-            array(
-                'label' => 'Provider',
-                'template' => 'MainBundle:PostAdmin:list_provider.html.twig',
+            ->add(
+                'mapper.provider'
+                ,
+                null,
+                array(
+                    'label' => 'Provider',
+                    'template' => 'MainBundle:PostAdmin:list_provider.html.twig',
+                )
             )
-        )
-          ->add(
-            'status',
-            null,
-            array(
-                'label' => 'Status',
-                'template' => 'MainBundle:PostAdmin:list_status.html.twig',
+            ->add(
+                'status',
+                null,
+                array(
+                    'label' => 'Status',
+                    'template' => 'MainBundle:PostAdmin:list_status.html.twig',
+                )
             )
-        )
-          ->add(
-            'logs',
-            null,
-            array(
-                'label' => 'Logs',
-                'template' => 'MainBundle:PostAdmin:list_logs.html.twig',
-            )
-        );
+            ->add(
+                'logs',
+                null,
+                array(
+                    'label' => 'Logs',
+                    'template' => 'MainBundle:PostAdmin:list_logs.html.twig',
+                )
+            );
     }
 
     protected function configureShowFields(ShowMapper $filter)
     {
         $filter
-          ->add('id')
-          ->add('createdAt');
+            ->add('id')
+            ->add('createdAt');
     }
 
     protected function configureDatagridFilters(DatagridMapper $filter)
     {
         $filter
-          ->add(
-            'status',
-            null,
-            array(),
-            'choice',
-            array(
-                'choices' => array(
-                    Post::STATUS_DRAFT => Post::STATUS_DRAFT,
-                    Post::STATUS_REVIEW => Post::STATUS_REVIEW,
-                    Post::STATUS_QUEUE => Post::STATUS_QUEUE,
-                    Post::STATUS_PUBLISH => Post::STATUS_PUBLISH,
+            ->add(
+                'status',
+                null,
+                array(),
+                'choice',
+                array(
+                    'choices' => array(
+                        Post::STATUS_DRAFT => Post::STATUS_DRAFT,
+                        Post::STATUS_REVIEW => Post::STATUS_REVIEW,
+                        Post::STATUS_QUEUE => Post::STATUS_QUEUE,
+                        Post::STATUS_PUBLISH => Post::STATUS_PUBLISH,
+                    ),
+                )
+            )
+            ->add(
+                'site',
+                'doctrine_orm_callback',
+                array(
+                    'callback' => function ($queryBuilder, $alias, $field, $value) {
+                        if ($value['value'] === null) {
+                            return;
+                        }
+                        /** @var $queryBuilder \Doctrine\ORM\QueryBuilder */
+                        $queryBuilder->innerJoin(sprintf('%s.mapper', $alias), 'm');
+                        $queryBuilder->innerJoin('m.site', 's');
+                        $queryBuilder->andWhere('s = :site');
+                        $queryBuilder->setParameter(':site', $value['value']);
+                    },
                 ),
-            )
-        )
-          ->add(
-            'site',
-            'doctrine_orm_callback',
-            array(
-                'callback' => function ($queryBuilder, $alias, $field, $value) {
-                    if ($value['value'] === null) {
-                        return;
-                    }
-                    /** @var $queryBuilder \Doctrine\ORM\QueryBuilder */
-                    $queryBuilder->innerJoin(sprintf('%s.mapper', $alias), 'm');
-                    $queryBuilder->innerJoin('m.site', 's');
-                    $queryBuilder->andWhere('s = :site');
-                    $queryBuilder->setParameter(':site', $value['value']);
-                },
-            ),
-            'entity',
-            array(
-                'label' => 'Site',
-                'class' => 'Lacus\MainBundle\Entity\Site',
-                'property' => 'name',
-            )
-        );
+                'entity',
+                array(
+                    'label' => 'Site',
+                    'class' => 'Lacus\MainBundle\Entity\Site',
+                    'property' => 'name',
+                )
+            );
     }
 
     private function getContentTemplate()
@@ -418,4 +418,15 @@ class PostAdmin extends Admin
 
         return $query;
     }
+
+    public function toString($object)
+    {
+        if ($object instanceof Post) {
+            return $object->getId();
+        } else {
+            return 'Post';
+        }
+    }
+
+
 }

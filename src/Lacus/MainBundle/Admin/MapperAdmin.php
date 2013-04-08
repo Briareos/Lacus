@@ -3,6 +3,7 @@
 namespace Lacus\MainBundle\Admin;
 
 use Sonata\AdminBundle\Admin\Admin;
+use Sonata\AdminBundle\Admin\AdminInterface;
 use Sonata\AdminBundle\Datagrid\DatagridMapper;
 use Lacus\MainBundle\Content\ProviderPool;
 use Sonata\AdminBundle\Show\ShowMapper;
@@ -186,7 +187,7 @@ class MapperAdmin extends Admin
         );
     }
 
-    protected function configureSideMenu(MenuItemInterface $menu, $action, Admin $childAdmin = null)
+    protected function configureSideMenu(MenuItemInterface $menu, $action, AdminInterface $childAdmin = null)
     {
         if (!$childAdmin && !in_array($action, array('edit', 'configure'))) {
             return;

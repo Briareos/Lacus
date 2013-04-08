@@ -8,17 +8,18 @@ set :user,        "cooleryc"
 set :server_user, "apache"
 
 set :repository,  "git://github.com/Briareos/Lacus.git"
+#set :repository,  "git@github.com:Briareos/Lacus.git"
 set :scm,         :git
-set :scm_verbose, true
+set :scm_passphrase, "metalfox"
 
 set :model_manager, "doctrine"
-set :deploy_via,  :remote_cache
 
 role :web,        domain                         # Your HTTP server, Apache/etc
 role :app,        domain                         # This may be the same as your `Web` server
 role :db,         domain, :primary => true       # This is where Symfony2 migrations will run
 
 set  :keep_releases,  3
+
 
 #logger.level = Logger::MAX_LEVEL
 
@@ -36,7 +37,6 @@ task :upload_parameters do
 end
 
 task :make_cache_writable do
-  current_path = deploy_to + "/current"
   try_sudo "setfacl -R -m u:#{server_user}:rwx -m u:#{user}:rwx #{deploy_to}/current/app/cache"
   try_sudo "setfacl -dR -m u:#{server_user}:rwx -m u:#{user}:rwx #{deploy_to}/current/app/cache"
 end
@@ -47,7 +47,6 @@ task :make_uploads_writable do
 end
 
 task :make_uploads_writable do
-  current_path = deploy_to + "/current"
   try_sudo "setfacl -R -m u:#{server_user}:rwx -m u:#{user}:rwx #{deploy_to}/shared/web/uploads"
   try_sudo "setfacl -dR -m u:#{server_user}:rwx -m u:#{user}:rwx #{deploy_to}/shared/web/uploads"
 end

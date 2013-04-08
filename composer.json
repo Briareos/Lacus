@@ -1,60 +1,60 @@
 {
-    "name":"symfony/framework-standard-edition",
-    "description":"The \"Symfony Standard Edition\" distribution",
-    "autoload":{
-        "psr-0":{
-            "":"src/"
+    "name": "symfony/framework-standard-edition",
+    "description": "The \"Symfony Standard Edition\" distribution",
+    "autoload": {
+        "psr-0": {
+            "": "src/"
         }
     },
-    "require":{
-        "php":">=5.3.3",
-        "symfony/symfony":"2.1.*",
-        "doctrine/orm":">=2.2.3,<2.4-dev",
-        "doctrine/doctrine-bundle":"1.0.*",
-        "twig/extensions":"1.0.*",
-        "symfony/assetic-bundle":"2.1.*",
-        "symfony/swiftmailer-bundle":"2.1.*",
-        "symfony/monolog-bundle":"2.1.*",
-        "sensio/distribution-bundle":"2.1.*",
-        "sensio/framework-extra-bundle":"2.1.*",
-        "sensio/generator-bundle":"2.1.*",
-        "jms/security-extra-bundle":"1.2.*",
-        "jms/di-extra-bundle":"1.1.*",
-        "sonata-project/user-bundle":"dev-master",
-        "sonata-project/doctrine-orm-admin-bundle":"dev-master",
-        "sonata-project/cache-bundle":"dev-master",
-        "doctrine/doctrine-fixtures-bundle":"dev-master",
-        "kriswallsmith/buzz":"v0.7",
-        "sensio/buzz-bundle":"dev-master",
-        "oldsound/rabbitmq-bundle":"dev-master",
-        "knplabs/knp-paginator-bundle":"dev-master",
-        "zendframework/zend-filter":"2.0.2",
-        "doctrine/doctrine-migrations-bundle":"dev-master"
+    "require": {
+        "php": ">=5.3.3",
+        "symfony/symfony": "2.2.*",
+        "doctrine/orm": "~2.2,>=2.2.3",
+        "doctrine/doctrine-bundle": "1.2.*",
+        "twig/extensions": "1.0.*",
+        "symfony/assetic-bundle": "2.1.*",
+        "symfony/swiftmailer-bundle": "2.2.*",
+        "symfony/monolog-bundle": "2.2.*",
+        "sensio/distribution-bundle": "2.2.*",
+        "sensio/framework-extra-bundle": "2.2.*",
+        "sensio/generator-bundle": "2.2.*",
+        "jms/security-extra-bundle": "1.4.*",
+        "jms/di-extra-bundle": "1.3.*",
+        "sonata-project/user-bundle": "2.2.*",
+        "sonata-project/doctrine-orm-admin-bundle": "2.2.*",
+        "sonata-project/cache-bundle": "2.1.*",
+        "doctrine/doctrine-fixtures-bundle": "2.1.*",
+        "kriswallsmith/buzz": "0.9.*",
+        "sensio/buzz-bundle": "0.2.*",
+        "oldsound/rabbitmq-bundle": "1.0.*",
+        "knplabs/knp-paginator-bundle": "2.3.*",
+        "zendframework/zend-filter": "2.1.*",
+        "doctrine/doctrine-migrations-bundle": "dev-master"
     },
-    "scripts":{
-        "post-install-cmd":[
+    "scripts": {
+        "post-install-cmd": [
             "Sensio\\Bundle\\DistributionBundle\\Composer\\ScriptHandler::buildBootstrap",
             "Sensio\\Bundle\\DistributionBundle\\Composer\\ScriptHandler::clearCache",
             "Sensio\\Bundle\\DistributionBundle\\Composer\\ScriptHandler::installAssets",
             "Sensio\\Bundle\\DistributionBundle\\Composer\\ScriptHandler::installRequirementsFile"
 
         ],
-        "post-update-cmd":[
+        "post-update-cmd": [
             "Sensio\\Bundle\\DistributionBundle\\Composer\\ScriptHandler::buildBootstrap",
             "Sensio\\Bundle\\DistributionBundle\\Composer\\ScriptHandler::clearCache",
             "Sensio\\Bundle\\DistributionBundle\\Composer\\ScriptHandler::installAssets",
             "Sensio\\Bundle\\DistributionBundle\\Composer\\ScriptHandler::installRequirementsFile"
         ]
     },
-    "repositories":[
+    "repositories": [
         {
-            "type":"composer",
-            "url":"http://packages.zendframework.com/"
+            "type": "composer",
+            "url": "http://packages.zendframework.com/"
         }
     ],
-    "minimum-stability":"dev",
-    "extra":{
-        "symfony-app-dir":"app",
-        "symfony-web-dir":"web"
+    "minimum-stability": "dev",
+    "extra": {
+        "symfony-app-dir": "app",
+        "symfony-web-dir": "web"
     }
 }
