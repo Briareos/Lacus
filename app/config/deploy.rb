@@ -7,10 +7,8 @@ set :use_sudo,    false
 set :user,        "cooleryc"
 set :server_user, "apache"
 
-set :repository,  "git://github.com/Briareos/Lacus.git"
-#set :repository,  "git@github.com:Briareos/Lacus.git"
+set :repository,  "git@github.com:Briareos/Lacus.git"
 set :scm,         :git
-set :scm_passphrase, "metalfox"
 
 set :model_manager, "doctrine"
 
@@ -41,7 +39,7 @@ task :make_cache_writable do
   try_sudo "setfacl -dR -m u:#{server_user}:rwx -m u:#{user}:rwx #{deploy_to}/current/app/cache"
 end
 
-task :make_uploads_writable do
+task :make_logs_writable do
   try_sudo "setfacl -R -m u:#{server_user}:rwx -m u:#{user}:rwx #{deploy_to}/shared/app/logs"
   try_sudo "setfacl -dR -m u:#{server_user}:rwx -m u:#{user}:rwx #{deploy_to}/shared/app/logs"
 end
@@ -53,6 +51,10 @@ end
 
 after "deploy:setup", "upload_parameters"
 after "deploy", "make_cache_writable"
+after "deploy", "make_logs_writable"
+after "deploy", "make_uploads_writable"
 
 # setfacl -R -m u:apache:rwx -m u:cooleryc:rwx current/app/cache shared/app/logs shared/web/uploads
 # setfacl -dR -m u:apache:rwx -m u:cooleryc:rwx current/app/cache shared/app/logs shared/web/uploads
+
+set :ssh_options, { :forward_agent => true }
