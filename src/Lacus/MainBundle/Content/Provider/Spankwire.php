@@ -171,8 +171,8 @@ class Spankwire extends AbstractProvider
         $categoryNodes = $crawler->filterXPath("//div[@class='category-thumb']");
         foreach ($categoryNodes as $categoryDomNode) {
             $categoryNode = new Crawler($categoryDomNode, $url);
-            $categoryName = $categoryNode->filterXPath('//h6/a')->text();
-            $categoryId = basename($categoryNode->filterXPath('//h6/a')->attr('href'));
+            $categoryName = $categoryNode->filterXPath('//h2/a')->text();
+            $categoryId = basename($categoryNode->filterXPath('//h2/a')->attr('href'));
             $categories->add(new Category($categoryName, $categoryId));
         }
     }
