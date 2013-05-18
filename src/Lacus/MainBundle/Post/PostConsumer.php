@@ -29,13 +29,19 @@ class PostConsumer implements ConsumerInterface
 
     function execute(AMQPMessage $msg)
     {
+        // We can't count on the connection being always open.
+        $this->em->getConnection()->connect();
+
         $messageBody = unserialize($msg->body);
         $post = $this->em->find('MainBundle:Post', $messageBody['post']);
         if (!$post instanceof Post) {
+            // The post might have been deleted in the meantime.
+            $this->em->getConnection()->close();
             return false;
         }
-        if($post->getStatus() !== Post::STATUS_PUBLISH) {
+        if ($post->getStatus() !== Post::STATUS_PUBLISH) {
             // The status of this post was changed after it entered message queue, so just ignore it.
+            $this->em->getConnection()->close();
             return true;
         }
         try {
@@ -51,6 +57,7 @@ class PostConsumer implements ConsumerInterface
             $this->em->persist($post);
             $this->em->flush();
 
+            $this->em->getConnection()->close();
             return true;
         } catch (LoginFormNotFoundException $le) {
             $error = 'Login form not found.';
@@ -67,6 +74,7 @@ class PostConsumer implements ConsumerInterface
         $this->em->persist($post);
         $this->em->flush();
 
+        $this->em->getConnection()->close();
         return true;
     }
 
