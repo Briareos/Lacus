@@ -289,7 +289,7 @@ class Spankwire extends AbstractProvider
         $response = $this->client->get($content->getUrl());
         $crawler = new Crawler($response->getContent(), $content->getUrl());
 
-        $title = $crawler->filterXPath('//h1')->eq(2)->text();
+        $title = $crawler->filterXPath('//h1')->eq(0)->text();
 
         $content->set('title', $title);
     }
