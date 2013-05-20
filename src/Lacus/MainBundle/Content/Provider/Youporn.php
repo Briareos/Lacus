@@ -32,7 +32,7 @@ class Youporn extends AbstractProvider
         /** @var $response \Buzz\Message\Response */
         $response = $this->client->get($url, $this->getGenericHeaders());
         $crawler = new Crawler($response->getContent(), $url);
-        $categoryNodes = $crawler->filterXPath("//div[@class='popdownContent']/div/ul/li/a");
+        $categoryNodes = $crawler->filterXPath("//div[@class='popdownContent'][2]/div/ul/li/a");
         foreach ($categoryNodes as $categoryDomNode) {
             /** @var $categoryNode \Symfony\Component\DomCrawler\Crawler */
             $categoryNode = new Crawler($categoryDomNode, $url);
