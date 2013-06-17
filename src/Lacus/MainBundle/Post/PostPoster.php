@@ -63,15 +63,18 @@ class PostPoster
         /** @var $response Response */
         $response = $this->browser->get($site->getLoginUrl());
         $this->cookieJar->processSetCookieHeaders(new Request(), $response);
-        $crawler = new Crawler($response->getContent(), $site->getLoginUrl());
+        $content = $response->getContent();
+        $crawler = new Crawler($content, $site->getLoginUrl());
         try {
-            $loginForm = $crawler->selectButton($site->getLoginButton())->form(
+            $loginButton = $crawler->selectButton($site->getLoginButton());
+            $loginForm = $loginButton->form(
                 array(
                     $site->getLoginUsername() => $account->getUsername(),
                     $site->getLoginPassword() => $account->getPassword(),
                 )
             );
         } catch (\InvalidArgumentException $e) {
+            die(json_encode(array('m'=>$content)));
             throw new LoginFormNotFoundException();
         }
 

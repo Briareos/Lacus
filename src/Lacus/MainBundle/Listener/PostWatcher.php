@@ -3,6 +3,7 @@
 namespace Lacus\MainBundle\Listener;
 
 use Doctrine\ORM\Event\LifecycleEventArgs;
+use Lacus\MainBundle\Post\PostPoster;
 use Symfony\Component\DependencyInjection\ContainerInterface;
 use OldSound\RabbitMqBundle\RabbitMq\Producer;
 use Doctrine\ORM\EntityManager;
@@ -12,7 +13,7 @@ use Lacus\MainBundle\Entity\Post;
 
 class PostWatcher
 {
-    private $postPoster;
+    private $postProducer;
 
     /**
      * @var ContainerInterface
@@ -21,10 +22,13 @@ class PostWatcher
 
     private $publish = array();
 
-    function __construct(Producer $postPoster, ContainerInterface $container)
+    private $postPoster;
+
+    function __construct(Producer $postProducer, ContainerInterface $container, PostPoster $postPoster)
     {
-        $this->postPoster = $postPoster;
+        $this->postProducer = $postProducer;
         $this->container = $container;
+        $this->postPoster =$postPoster;
     }
 
     public function postPersist(LifecycleEventArgs $args)
@@ -82,8 +86,10 @@ class PostWatcher
 
     public function enqueue(Post $post)
     {
+        $this->postPoster->post($post);
+        return;
         $msg = array('post' => $post->getId());
-        $this->postPoster->publish(serialize($msg));
+        $this->postProducer->publish(serialize($msg));
     }
 
     public function getUser()

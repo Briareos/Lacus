@@ -40,7 +40,7 @@ services:
         arguments: [ @lacus.post.poster, @doctrine.orm.default_entity_manager ]
     lacus.post.watcher:
         class: Lacus\MainBundle\Listener\PostWatcher
-        arguments: [ @old_sound_rabbit_mq.post_poster_producer, @service_container ]
+        arguments: [ @old_sound_rabbit_mq.post_poster_producer, @service_container, @lacus.post.poster ]
         tags:
             - { name: doctrine.event_listener, event: postPersist }
             - { name: doctrine.event_listener, event: preUpdate }
