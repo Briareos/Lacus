@@ -86,8 +86,8 @@ class PostWatcher
 
     public function enqueue(Post $post)
     {
-        $this->postPoster->post($post);
-        return;
+//        $this->postPoster->post($post);
+//        return;
         $msg = array('post' => $post->getId());
         $this->postProducer->publish(serialize($msg));
     }

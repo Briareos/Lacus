@@ -51,6 +51,7 @@ class PostPoster
             }
         }
         $submitUrl->applyToRequest($request);
+        $this->cookieJar->clearExpiredCookies();
         $this->cookieJar->addCookieHeaders($request);
         $response = new Response();
         $this->browser->send($request, $response);
@@ -74,7 +75,6 @@ class PostPoster
                 )
             );
         } catch (\InvalidArgumentException $e) {
-            die(json_encode(array('m'=>$content)));
             throw new LoginFormNotFoundException();
         }
 
